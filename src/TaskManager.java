@@ -1,10 +1,10 @@
 import java.util.*;
 
 public class TaskManager {
-    public HashMap<Integer, Task> tasks = new HashMap<>();
-    public HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    public HashMap<Integer, Epic> epics = new HashMap<>();
-    public int idCounter = 0;
+    private HashMap<Integer, Task> tasks = new HashMap<>();
+    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private HashMap<Integer, Epic> epics = new HashMap<>();
+    private int idCounter = 0;
 
     public int generateId() {
         return idCounter++;
