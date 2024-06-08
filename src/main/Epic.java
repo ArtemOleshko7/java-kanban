@@ -1,5 +1,6 @@
-import java.util.ArrayList;
-import java.util.Objects;
+package main;
+
+import java.util.*;
 
 public class Epic extends Task {
     private ArrayList<Integer> subtaskIds = new ArrayList<>();
@@ -15,9 +16,10 @@ public class Epic extends Task {
     public void setSubtaskIds(int id) {
         subtaskIds.add(id);
     }
+
     @Override
     public String toString() {
-        return "Epic{" +
+        return "main.Epic{" +
                 "subtaskIDs=" + subtaskIds +
                 ", description='" + getDescription() + '\'' +
                 ", ID=" + getId() +
@@ -37,4 +39,5 @@ public class Epic extends Task {
     public int hashCode() {
         return Objects.hash(super.hashCode(), subtaskIds);
     }
+
 }

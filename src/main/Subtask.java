@@ -1,3 +1,5 @@
+package main;
+
 public class Subtask extends Task {
 
     private Integer epicId;
@@ -20,7 +22,7 @@ public class Subtask extends Task {
     public String toString() {
         return "SubTask{" +"\n" +
                 "EpicId =" + epicId + ","+
-                "Status=" + super.getStatus() + "," +
+                "main.Status=" + super.getStatus() + "," +
                 "Id=" + super.getId() + "," +
                 "Name=" + super.getName() + "," +
                 "Description=" + super.getDescription() + "," +

@@ -1,4 +1,6 @@
-import java.util.Objects;
+package main;
+
+import java.util.*;
 
 public class Task {
     protected int id;
@@ -11,11 +13,27 @@ public class Task {
         this.description = description;
         this.status = status;
     }
+
     public Task(Integer id, String name, String description, Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
+    }
+
+
+    public Task(Task task) {
+        this.name = task.getName();
+        this.description = task.getDescription();
+        this.status = task.getStatus();
+        this.id = task.getId();
+    }
+
+    public Task(String name, String description, Status status, Integer epicId) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.id = epicId;
     }
 
     public int getId() {
@@ -50,7 +68,7 @@ public class Task {
     }
     @Override
     public String toString() {
-        return "Task{" +
+        return "main.Task{" +
                 "description='" + description + '\'' +
                 ", ID=" + id +
                 ", name='" + name + '\'' +
