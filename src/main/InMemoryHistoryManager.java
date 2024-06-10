@@ -3,7 +3,7 @@ package main;
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    static final int maxNumberOfHistory = 10;
+    private static final int maxNumberOfHistory = 10;
     List<Task> history = new ArrayList<>();
 
     @Override
@@ -17,7 +17,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public List<Task> getHistory() {
+    public List<Task> getAll() {
         return history;
     }
 }

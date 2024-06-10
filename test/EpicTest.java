@@ -1,8 +1,9 @@
-import main.Epic;
-import main.Status;
-import main.Task;
+import main.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EpicTest {
     @Test
@@ -15,4 +16,6 @@ public class EpicTest {
 
         assertEquals(epic.getId(), epic1.getId());
     }
+
+
 }

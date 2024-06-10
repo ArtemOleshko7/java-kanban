@@ -16,7 +16,7 @@ public class InMemoryHistoryManagerTest {
     void add() {
         Task task = new Task("Уборка", "Помыть посуду", Status.DONE, 5);
         historyManager.add(task);
-        final List<Task> history = historyManager.getHistory();
+        final List<Task> history = historyManager.getAll();
         assertNotNull(history, "История не пустая.");
         assertEquals(1, history.size(), "История не пустая.");
     }
@@ -30,7 +30,7 @@ public class InMemoryHistoryManagerTest {
         task2.setName("Убрать кухню");
         historyManager.add(task2);
 
-        final List<Task> history = historyManager.getHistory();
+        final List<Task> history = historyManager.getAll();
         assertNotEquals(history.get(0).getName(), history.get(1).getName(), "Не сохранялись предыдущие данные");
     }
 }

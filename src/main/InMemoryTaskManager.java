@@ -6,17 +6,14 @@ public class InMemoryTaskManager implements TaskManager {
     private Map<Integer, Task> tasks;
     private Map<Integer, Subtask> subtasks;
     private Map<Integer, Epic> epics;
+    private HistoryManager historyManager;
     private int idCounter = 0;
-
-    Managers managers = new Managers();
-    HistoryManager inMemoryHistoryManager = managers.getDefaultHistory();
 
     public InMemoryTaskManager() {
         this.tasks = new HashMap<>();
         this.subtasks = new HashMap<>();
         this.epics = new HashMap<>();
     }
-
 
     public int generateId() {
         return idCounter++;
@@ -191,8 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
         epics.clear();
     }
 
-    @Override
-    public void updateStatusEpic(Epic epic) {
+    private void updateStatusEpic(Epic epic) {
         if (epics.containsKey(epic.getId())) {
             if (epic.getSubtaskIds().isEmpty()) {
                 epic.setStatus(Status.NEW);
@@ -228,4 +224,10 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Эпик не найден");
         }
     }
+
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getAll();
+    }
 }
+

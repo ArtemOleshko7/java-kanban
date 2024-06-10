@@ -53,19 +53,19 @@ public class Main {
         subtask1.setStatus(Status.IN_PROGRESS);
         inMemoryTaskManager.updateSubtask(subtask1);
         Epic epic1 = inMemoryTaskManager.getEpic(2);
-        inMemoryTaskManager.updateStatusEpic(epic1);
+        inMemoryTaskManager.updateEpic(epic1);
 
         Subtask subtask2 = inMemoryTaskManager.getSubtask(4);
         subtask2.setStatus(Status.DONE);
         inMemoryTaskManager.updateSubtask(subtask2);
         epic1 = inMemoryTaskManager.getEpic(2);
-        inMemoryTaskManager.updateStatusEpic(epic1);
+        inMemoryTaskManager.updateEpic(epic1);
 
         Subtask subtask3 = inMemoryTaskManager.getSubtask(6);
         subtask3.setStatus(Status.DONE);
         inMemoryTaskManager.updateSubtask(subtask3);
         Epic epic2 = inMemoryTaskManager.getEpic(5);
-        inMemoryTaskManager.updateStatusEpic(epic2);
+        inMemoryTaskManager.updateEpic(epic2);
 
         System.out.println("Список Эпиков после изменения статусов:");
         List<Epic> epicsListAfterStatusChange = inMemoryTaskManager.getAllEpics();
