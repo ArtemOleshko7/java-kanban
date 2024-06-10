@@ -23,7 +23,6 @@ public interface TaskManager {
     List<Epic> getAllEpics();
     void deleteEpic(int idCounter);
     void deleteAllEpics();
-
     List<Task> getHistory();
 }
 
