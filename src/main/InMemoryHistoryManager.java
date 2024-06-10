@@ -8,12 +8,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        if (history.size() < maxNumberOfHistory) {
-            history.add(new Task(task));
-        } else {
+        if (history.size() > maxNumberOfHistory) {
             history.remove(0);
-            history.add(new Task(task));
         }
+        history.add(new Task(task));
     }
 
     @Override
