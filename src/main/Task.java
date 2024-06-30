@@ -63,9 +63,11 @@ public class Task {
     public Status getStatus() {
         return status;
     }
+
     public void setStatus(Status status) {
         this.status = status;
     }
+
     @Override
     public String toString() {
         return "main.Task{" +
@@ -75,6 +77,7 @@ public class Task {
                 ", status=" + status +
                 '}';
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,6 +86,7 @@ public class Task {
         return id == task.id && Objects.equals(description, task.description) && Objects.equals(name, task.name)
                 && status == task.status;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(description, id, name, status);
