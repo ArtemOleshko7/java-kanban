@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TaskTest {
+
+
     @Test
     void shouldHaveSameId() {
         Task task1 = new Task("Получить почту", "Забрать письма", Status.NEW);
@@ -15,4 +17,5 @@ class TaskTest {
 
         assertEquals(task1.getId(), task2.getId());
     }
+
 }

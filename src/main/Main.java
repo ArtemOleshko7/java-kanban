@@ -1,14 +1,15 @@
 package main;
+
 import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) {
-       Managers managers = new Managers();
-       TaskManager inMemoryTaskManager = managers.getDefault();
-       HistoryManager inMemoryHistoryManager = managers.getDefaultHistory();
-       Task task = new Task("run", "running", Status.NEW);
-       inMemoryTaskManager.addTask(task);
+        Managers managers = new Managers();
+        TaskManager inMemoryTaskManager = managers.getDefault();
+        HistoryManager inMemoryHistoryManager = managers.getDefaultHistory();
+        Task task = new Task("run", "running", Status.NEW);
+        inMemoryTaskManager.addTask(task);
 
         inMemoryTaskManager.addTask(new Task("Задача 1 без подзадач", "main.Task 1 without subtasks",
                 Status.NEW));

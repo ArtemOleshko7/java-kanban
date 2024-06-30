@@ -27,6 +27,7 @@ public class Epic extends Task {
                 ", status=" + getStatus() +
                 '}';
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,6 +36,7 @@ public class Epic extends Task {
         Epic epic = (Epic) o;
         return Objects.equals(subtaskIds, epic.subtaskIds);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), subtaskIds);
