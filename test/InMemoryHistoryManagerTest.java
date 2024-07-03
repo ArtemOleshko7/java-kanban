@@ -1,7 +1,4 @@
-import main.HistoryManager;
-import main.Managers;
-import main.Status;
-import main.Task;
+import main.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,21 +13,23 @@ public class InMemoryHistoryManagerTest {
     void add() {
         Task task = new Task("Уборка", "Помыть посуду", Status.DONE, 5);
         historyManager.add(task);
-        final List<Task> history = historyManager.getAll();
+        final List<Task> history = historyManager.getHistory();
         assertNotNull(history, "История не пустая.");
         assertEquals(1, history.size(), "История не пустая.");
     }
 
     @Test
     void shouldNotEqualsTaskInHistoryAfterChange() {
+        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
         Task task1 = new Task("Уборка", "Помыть посуду", Status.DONE, 5);
-        Task task2 = new Task(task1); // Создаем копию task1
-        historyManager.add(task1);
+        Task task2 = new Task("Покупки", "Купить продукты", Status.NEW, 3);
 
-        task2.setName("Убрать кухню");
+        historyManager.add(task1);
         historyManager.add(task2);
 
-        final List<Task> history = historyManager.getAll();
-        assertNotEquals(history.get(0).getName(), history.get(1).getName(), "Не сохранялись предыдущие данные");
+        assertNotEquals(historyManager.getTasks().get(0).getName(),
+                historyManager.getTasks().get(1).getName(),
+                "Не сохранялись предыдущие данные");
     }
+
 }
