@@ -32,7 +32,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     void shouldBeEqualsAllArgumentsTaskAfterAddInManager() {
-        Task task = new Task(null, "task1", "Description1", Status.NEW, TaskType.TASK);
+        Task task = new Task(null, "Уборка", "Описание задачи", Status.NEW, TaskType.TASK);
         taskManager.addTask(task);
         Task task1 = taskManager.getTask(task.getId());
         assertEquals("Уборка", task1.getName());
