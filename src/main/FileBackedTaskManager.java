@@ -118,7 +118,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private String toString(Epic task) {
-        return String.format("%d,%S,%s,%S,%s", task.getId(), task.getType(), task.getName() , task.getStatus(), task.getDescription());
+        return String.format("%d,%S,%s,%S,%s", task.getId(), task.getType(), task.getName(), task.getStatus(), task.getDescription());
     }
 
     @Override
