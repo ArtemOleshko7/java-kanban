@@ -11,7 +11,7 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     void add() {
-        Task task = new Task("Уборка", "Помыть посуду", Status.DONE, 5);
+        Task task = new Task(1, "Task Name", "Task Description", Status.NEW, TaskType.TASK);
         historyManager.add(task);
         final List<Task> history = historyManager.getHistory();
         assertNotNull(history, "История не пустая.");
@@ -21,8 +21,8 @@ public class InMemoryHistoryManagerTest {
     @Test
     void shouldNotEqualsTaskInHistoryAfterChange() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
-        Task task1 = new Task("Уборка", "Помыть посуду", Status.DONE, 5);
-        Task task2 = new Task("Покупки", "Купить продукты", Status.NEW, 3);
+        Task task1 = new Task(1, "Уборка", "Помыть посуду", Status.DONE, TaskType.TASK);
+        Task task2 = new Task(2, "Покупки", "Купить продукты", Status.NEW, TaskType.TASK);
 
         historyManager.add(task1);
         historyManager.add(task2);

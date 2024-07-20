@@ -7,33 +7,32 @@ public class Task {
     protected String name;
     protected String description;
     protected Status status;
+    protected final TaskType type;
 
-    public Task(String name, String description, Status status) {
+    public Task(Integer id, String name, String description, Status status, TaskType type) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Имя не может быть пустым.");
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("Описание не может быть null.");
+        }
+        if (status == null) {
+            throw new IllegalArgumentException("Статус не может быть null.");
+        }
+
+        this.id = id != null ? id : 0; // Присваиваем 0, если id не был передан
         this.name = name;
         this.description = description;
         this.status = status;
+        this.type = TaskType.TASK;
     }
 
-    public Task(Integer id, String name, String description, Status status) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-    }
-
-
-    public Task(Task task) {
-        this.name = task.getName();
-        this.description = task.getDescription();
-        this.status = task.getStatus();
-        this.id = task.getId();
-    }
-
-    public Task(String name, String description, Status status, Integer epicId) {
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.id = epicId;
+    public Task() {
+        this.id = 0;
+        this.name = "";
+        this.description = "";
+        this.status = Status.NEW; // Предположим, статус по умолчанию - NEW
+        this.type = TaskType.TASK;
     }
 
     public int getId() {
@@ -48,16 +47,8 @@ public class Task {
         return name;
     }
 
-    public void setName(String name) {   //нужен ли?
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Status getStatus() {
@@ -68,12 +59,17 @@ public class Task {
         this.status = status;
     }
 
+    public TaskType getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
-        return "main.Task{" +
-                "description='" + description + '\'' +
-                ", ID=" + id +
+        return "Task{" +
+                "type=" + type +
+                ", id=" + id +
                 ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 ", status=" + status +
                 '}';
     }

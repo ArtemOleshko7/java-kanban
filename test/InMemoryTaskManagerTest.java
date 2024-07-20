@@ -11,17 +11,20 @@ public class InMemoryTaskManagerTest {
     @Test
     void testAddTask() {
         InMemoryTaskManager taskManager = new InMemoryTaskManager();
-        Task task = new Task("Test Task", "Description", Status.NEW);
-        Task addedTask = taskManager.addTask(task);
-        assertNotNull(addedTask.getId());
-        assertEquals("Test Task", addedTask.getName());
-        assertEquals("Description", addedTask.getDescription());
+        Task task = new Task(null, "task1", "Description1", Status.NEW, TaskType.TASK);
+        taskManager.addTask(task);
+
+        Task addedTask = taskManager.getTask(task.getId()); // предположим, что есть метод для получения задачи по ID
+
+        assertNotNull(addedTask); // Проверка, что задача добавлена
+        assertEquals("task1", addedTask.getName());
+        assertEquals("Description1", addedTask.getDescription());
         assertEquals(Status.NEW, addedTask.getStatus());
     }
 
     @Test
     void shouldBeChangedId() {
-        Task task = new Task("Уборка", "Помыть посуду", Status.DONE, 50);
+        Task task = new Task(null, "task1", "Description1", Status.NEW, TaskType.TASK);
         taskManager.addTask(task);
         Task task1 = taskManager.getTask(task.getId());
         assertNotEquals(50, task1.getId());
@@ -29,7 +32,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     void shouldBeEqualsAllArgumentsTaskAfterAddInManager() {
-        Task task = new Task("Уборка", "Помыть посуду", Status.DONE);
+        Task task = new Task(null, "task1", "Description1", Status.NEW, TaskType.TASK);
         taskManager.addTask(task);
         Task task1 = taskManager.getTask(task.getId());
         assertEquals("Уборка", task1.getName());

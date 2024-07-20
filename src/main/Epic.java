@@ -4,17 +4,27 @@ import java.util.*;
 
 public class Epic extends Task {
     private ArrayList<Integer> subtaskIds = new ArrayList<>();
+    private Map<Integer, Subtask> subtasks = new HashMap<>();
 
     public Epic(String name, String description, Status status) {
-        super(name, description, status);
+        super(null, name, description, status, TaskType.EPIC_TASK); // ID будет присвоен позже
+        this.subtaskIds = new ArrayList<>(); // Инициализация списка подзадач
     }
 
     public ArrayList<Integer> getSubtaskIds() {
         return subtaskIds;
     }
 
-    public void setSubtaskIds(int id) {
-        subtaskIds.add(id);
+    public void addSubtaskIds(int id, Subtask subtask) {
+        if (subtask == null) {
+            throw new IllegalArgumentException("Подзадача не может быть null.");
+        }
+        if (!subtaskIds.contains(id)) {
+            subtaskIds.add(id);
+            subtasks.put(id, subtask);
+        } else {
+            throw new IllegalArgumentException("Подзадача с таким ID уже добавлена.");
+        }
     }
 
     @Override

@@ -1,9 +1,9 @@
-import main.*;
+import main.Epic;
+import main.Status;
+import main.Task;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EpicTest {
     @Test

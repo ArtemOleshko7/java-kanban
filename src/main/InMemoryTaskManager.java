@@ -3,16 +3,21 @@ package main;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    private Map<Integer, Task> tasks;
-    private Map<Integer, Subtask> subtasks;
-    private Map<Integer, Epic> epics;
-    private HistoryManager historyManager = new InMemoryHistoryManager();
+    protected final Map<Integer, Task> tasks;
+    protected final Map<Integer, Subtask> subtasks;
+    protected final Map<Integer, Epic> epics;
+    protected HistoryManager historyManager = new InMemoryHistoryManager();
     private int idCounter = 0;
 
-    public InMemoryTaskManager() {
+    public InMemoryTaskManager(HistoryManager historyManager) {
         this.tasks = new HashMap<>();
         this.subtasks = new HashMap<>();
         this.epics = new HashMap<>();
+        this.historyManager = historyManager != null ? historyManager : new InMemoryHistoryManager();
+    }
+
+    public InMemoryTaskManager() {
+        this(null); // Вызов другого конструктора с null
     }
 
     public int generateId() {
@@ -20,14 +25,21 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task addTask(Task task) {
+    public void addTask(Task task) {
         task.setId(generateId());
         tasks.put(task.getId(), task);
-        return task;
     }
 
     @Override
-    public void updateTask(Task task) {
+    public int createTask(Task task) throws ManagerSaveException {
+        idCounter++;
+        task.setId(idCounter);
+        tasks.put(task.getId(), task);
+        return idCounter;
+    }
+
+    @Override
+    public void updateTask(int id, Task task) {
         if (tasks.containsKey(task.getId())) {
             tasks.put(task.getId(), task);
         } else {
@@ -63,32 +75,54 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteAllTasks() {
+    public void deleteAllTask() {
         tasks.clear();
     }
 
     @Override
     public void addSubtask(Subtask subtask) {
+        if (subtask == null) {
+            throw new IllegalArgumentException("Подзадача должна быть связана с эпиком.");
+        }
+
         int subtaskId = generateId();
         subtask.setId(subtaskId);
+
         Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
             subtasks.put(subtaskId, subtask);
-            epic.setSubtaskIds(subtaskId);
+            epic.addSubtaskIds(subtaskId, subtask);
             updateStatusEpic(epic);
         } else {
-            System.out.println("Такого эпика нет");
+            throw new NoSuchElementException("Такого эпика нет");
         }
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
-        if (subtasks.containsKey(subtask.getId())) {
-            subtasks.put(subtask.getId(), subtask);
+    public int createSubtask(Subtask subtask) throws ManagerSaveException {
+        if (subtask == null) {
+            throw new ManagerSaveException("Подзадача не может быть null.");
+        }
+        idCounter++;
+        subtask.setId(idCounter);
+        subtasks.put(subtask.getId(), subtask);
+        return idCounter;
+    }
+
+    @Override
+    public void updateSubtask(int id, Subtask subtask) throws ManagerSaveException {
+        if (subtask == null) {
+            throw new ManagerSaveException("Подзадача не может быть null.");
+        }
+        if (subtasks.containsKey(id)) {
+            subtask.setId(id); // Устанавливаем ID перед обновлением
+            subtasks.put(id, subtask);
+
             Epic epic = epics.get(subtask.getEpicId());
             updateStatusEpic(epic);
+
         } else {
-            System.out.println("Такой подзадачи нет");
+            System.out.println("Подзадачи с ID " + id + " не существует.");
         }
     }
 
@@ -153,12 +187,29 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateEpic(Epic epic) {
-        if (epics.containsKey(epic.getId())) {
-            epics.put(epic.getId(), epic);
-            updateStatusEpic(epic);
+    public int createEpic(Epic epic) throws ManagerSaveException {
+        if (epic == null) {
+            throw new ManagerSaveException("Эпик не может быть null.");
+        }
+        idCounter++;
+        epic.setId(idCounter);
+        epics.put(epic.getId(), epic);
+        return idCounter;
+    }
+
+    @Override
+    public void updateEpic(int id, Epic epic) throws ManagerSaveException {
+        if (epic == null) {
+            throw new ManagerSaveException("Эпик не может быть null.");
+        }
+        if (epics.containsKey(id)) {
+            epic.setId(id); // Устанавливаем ID перед обновлением
+            epics.put(id, epic);
+
+            updateStatusEpic(epic); // Обновляем статус эпика
+
         } else {
-            System.out.println("Такого эпика нет");
+            throw new NoSuchElementException("Эпика с ID " + id + " не существует.");
         }
     }
 
@@ -240,5 +291,20 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Task> getHistory() {
         return historyManager.getHistory();
     }
-}
 
+    protected void setTask(Task task) {
+        tasks.put(task.getId(), task); // Добавляем задачу в общую коллекцию
+
+        if (task instanceof Epic) {
+            epics.put(task.getId(), (Epic) task);
+        } else if (task instanceof Subtask) {
+            Subtask subTask = (Subtask) task;
+            subtasks.put(subTask.getId(), subTask);
+
+            Epic epicTask = epics.get(subTask.getEpicId());
+            if (epicTask != null) {
+                epicTask.addSubtaskIds(subTask.getId(), subTask);
+            }
+        }
+    }
+}
