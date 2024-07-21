@@ -1,4 +1,7 @@
-package main;
+package Model;
+
+import main.Status;
+import main.TaskType;
 
 import java.util.*;
 
@@ -7,9 +10,9 @@ public class Task {
     protected String name;
     protected String description;
     protected Status status;
-    protected final TaskType type;
 
-    public Task(Integer id, String name, String description, Status status, TaskType type) {
+
+    public Task(Integer id, String name, String description, Status status) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Имя не может быть пустым.");
         }
@@ -24,7 +27,7 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
-        this.type = TaskType.TASK;
+
     }
 
     public Task() {
@@ -32,7 +35,11 @@ public class Task {
         this.name = "";
         this.description = "";
         this.status = Status.NEW; // Предположим, статус по умолчанию - NEW
-        this.type = TaskType.TASK;
+
+    }
+
+    public TaskType getType() {
+        return TaskType.TASK;
     }
 
     public int getId() {
@@ -59,14 +66,10 @@ public class Task {
         this.status = status;
     }
 
-    public TaskType getType() {
-        return type;
-    }
-
     @Override
     public String toString() {
         return "Task{" +
-                "type=" + type +
+                "type=" + getType() +
                 ", id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

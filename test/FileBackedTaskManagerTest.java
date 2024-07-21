@@ -1,4 +1,10 @@
-import main.*;
+import Exception.ManagerSaveException;
+import Model.Epic;
+import Model.Subtask;
+import Model.Task;
+import Service.FileBackedTaskManager;
+import Service.Managers;
+import main.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,13 +18,13 @@ class FileBackedTaskManagerTest {
 
     @BeforeEach
     public void beforeEach() {
-        manager = new FileBackedTaskManager(Managers.getDefaultHistory());
+        manager = new FileBackedTaskManager(Managers.getDefaultHistory(), "TaskManagerTestFile.txt");
     }
 
 
     @Test
     void saveAndLoadTest() {
-        Task task1 = new Task(null, "task1", "Description1", Status.NEW, TaskType.TASK);
+        Task task1 = new Task(null, "task1", "Description1", Status.NEW);
         Epic epic1 = new Epic("epic1", "EpicDescription1", Status.NEW);
         Subtask subTask1 = new Subtask("subTask1", "SubTaskDescription1", Status.IN_PROGRESS, epic1.getId());
 

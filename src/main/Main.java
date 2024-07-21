@@ -1,6 +1,10 @@
 package main;
-
-import java.util.*;
+import Exception.ManagerSaveException;
+import Model.Epic;
+import Model.Subtask;
+import Model.Task;
+import Service.Managers;
+import Service.TaskManager;
 
 public class Main {
 
@@ -8,8 +12,8 @@ public class Main {
         TaskManager taskManager = Managers.getDefault();
 
         try {
-            Task task1 = new Task(1, "task1", "desc1", Status.NEW, TaskType.TASK);
-            Task task2 = new Task(2, "task2", "desc2", Status.NEW, TaskType.TASK);
+            Task task1 = new Task(1, "task1", "desc1", Status.NEW);
+            Task task2 = new Task(2, "task2", "desc2", Status.NEW);
             Epic epic1 = new Epic("Epic1", "descrEpic1", Status.NEW);
             Subtask subtask1 = new Subtask("SubTask1", "descSub1", Status.NEW, epic1.getId());
             Subtask subtask2 = new Subtask("SubTask2", "descSub2", Status.NEW, epic1.getId());

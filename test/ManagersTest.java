@@ -1,6 +1,6 @@
-import main.HistoryManager;
-import main.Managers;
-import main.TaskManager;
+import Service.HistoryManager;
+import Service.Managers;
+import Service.TaskManager;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

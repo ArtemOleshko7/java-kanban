@@ -1,4 +1,10 @@
-package main;
+package Service;
+
+import Exception.ManagerSaveException;
+import Model.Epic;
+import Model.Subtask;
+import Model.Task;
+import main.Status;
 
 import java.util.*;
 
@@ -6,18 +12,18 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> tasks;
     protected final Map<Integer, Subtask> subtasks;
     protected final Map<Integer, Epic> epics;
-    protected HistoryManager historyManager = new InMemoryHistoryManager();
-    private int idCounter = 0;
+    protected HistoryManager historyManager;
+    int idCounter = 0;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.tasks = new HashMap<>();
         this.subtasks = new HashMap<>();
         this.epics = new HashMap<>();
-        this.historyManager = historyManager != null ? historyManager : new InMemoryHistoryManager();
+        this.historyManager = historyManager != null ? historyManager : Managers.getDefaultHistory();
     }
 
     public InMemoryTaskManager() {
-        this(null); // Вызов другого конструктора с null
+        this(Managers.getDefaultHistory());  // Вызов другого конструктора с null
     }
 
     public int generateId() {
@@ -292,19 +298,4 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
-    protected void setTask(Task task) {
-        tasks.put(task.getId(), task); // Добавляем задачу в общую коллекцию
-
-        if (task instanceof Epic) {
-            epics.put(task.getId(), (Epic) task);
-        } else if (task instanceof Subtask) {
-            Subtask subTask = (Subtask) task;
-            subtasks.put(subTask.getId(), subTask);
-
-            Epic epicTask = epics.get(subTask.getEpicId());
-            if (epicTask != null) {
-                epicTask.addSubtaskIds(subTask.getId(), subTask);
-            }
-        }
-    }
 }

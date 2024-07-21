@@ -1,4 +1,7 @@
-package main;
+package Model;
+
+import main.Status;
+import main.TaskType;
 
 import java.util.*;
 
@@ -7,7 +10,7 @@ public class Epic extends Task {
     private Map<Integer, Subtask> subtasks = new HashMap<>();
 
     public Epic(String name, String description, Status status) {
-        super(null, name, description, status, TaskType.EPIC_TASK); // ID будет присвоен позже
+        super(null, name, description, status); // ID будет присвоен позже
         this.subtaskIds = new ArrayList<>(); // Инициализация списка подзадач
     }
 
@@ -25,6 +28,11 @@ public class Epic extends Task {
         } else {
             throw new IllegalArgumentException("Подзадача с таким ID уже добавлена.");
         }
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC_TASK;
     }
 
     @Override

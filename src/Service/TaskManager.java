@@ -1,6 +1,11 @@
-package main;
+package Service;
 
-import java.util.*;
+import Exception.ManagerSaveException;
+import Model.Epic;
+import Model.Subtask;
+import Model.Task;
+
+import java.util.List;
 
 public interface TaskManager {
 
@@ -32,7 +37,7 @@ public interface TaskManager {
 
     void deleteSubtask(int idCounter);
 
-    void deleteAllSubtasks() throws ManagerSaveException;
+    void deleteAllSubtasks();
 
     void addEpic(Epic epic);
 

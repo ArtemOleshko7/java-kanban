@@ -1,4 +1,8 @@
-import main.*;
+import Model.Task;
+import Service.InMemoryTaskManager;
+import Service.Managers;
+import Service.TaskManager;
+import main.Status;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,7 +15,7 @@ public class InMemoryTaskManagerTest {
     @Test
     void testAddTask() {
         InMemoryTaskManager taskManager = new InMemoryTaskManager();
-        Task task = new Task(null, "task1", "Description1", Status.NEW, TaskType.TASK);
+        Task task = new Task(null, "task1", "Description1", Status.NEW);
         taskManager.addTask(task);
 
         Task addedTask = taskManager.getTask(task.getId()); // предположим, что есть метод для получения задачи по ID
@@ -24,7 +28,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     void shouldBeChangedId() {
-        Task task = new Task(null, "task1", "Description1", Status.NEW, TaskType.TASK);
+        Task task = new Task(null, "task1", "Description1", Status.NEW);
         taskManager.addTask(task);
         Task task1 = taskManager.getTask(task.getId());
         assertNotEquals(50, task1.getId());
@@ -32,7 +36,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     void shouldBeEqualsAllArgumentsTaskAfterAddInManager() {
-        Task task = new Task(null, "Уборка", "Помыть посуду", Status.NEW, TaskType.TASK);
+        Task task = new Task(null, "Уборка", "Помыть посуду", Status.NEW);
         taskManager.addTask(task);
         Task task1 = taskManager.getTask(task.getId());
         assertEquals("Уборка", task1.getName());

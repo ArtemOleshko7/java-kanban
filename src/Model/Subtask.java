@@ -1,17 +1,25 @@
-package main;
+package Model;
+
+import main.Status;
+import main.TaskType;
 
 public class Subtask extends Task {
 
     private Integer epicId;
 
     public Subtask(String name, String description, Status status, Integer epicId) {
-        super(null, name, description, status, TaskType.SUB_TASK); // id будет присвоен позже
+        super(null, name, description, status); // id будет присвоен позже
         this.epicId = epicId;
     }
 
     public Subtask(Integer id, String name, String description, Status status, Integer epicId) {
-        super(id, name, description, status, TaskType.SUB_TASK); // Добавьте тип задачи здесь
+        super(id, name, description, status); // Добавьте тип задачи здесь
         this.epicId = epicId;
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.SUB_TASK;
     }
 
     public int getEpicId() {

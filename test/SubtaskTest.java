@@ -1,5 +1,5 @@
 import main.Status;
-import main.Subtask;
+import Model.Subtask;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

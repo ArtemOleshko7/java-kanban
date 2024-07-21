@@ -1,6 +1,6 @@
-import main.Epic;
+import Model.Epic;
 import main.Status;
-import main.Task;
+import Model.Task;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
