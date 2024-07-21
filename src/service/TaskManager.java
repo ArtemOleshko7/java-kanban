@@ -1,9 +1,9 @@
-package Service;
+package service;
 
 import exception.ManagerSaveException;
-import Model.Epic;
-import Model.Subtask;
-import Model.Task;
+import model.Epic;
+import model.Subtask;
+import model.Task;
 
 import java.util.List;
 

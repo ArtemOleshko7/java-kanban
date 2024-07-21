@@ -1,9 +1,9 @@
 import exception.ManagerSaveException;
-import Model.Epic;
-import Model.Subtask;
-import Model.Task;
-import Service.FileBackedTaskManager;
-import Service.Managers;
+import model.Epic;
+import model.Subtask;
+import model.Task;
+import service.FileBackedTaskManager;
+import service.Managers;
 import main.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

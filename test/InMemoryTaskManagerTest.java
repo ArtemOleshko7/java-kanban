@@ -1,7 +1,7 @@
-import Model.Task;
-import Service.InMemoryTaskManager;
-import Service.Managers;
-import Service.TaskManager;
+import model.Task;
+import service.InMemoryTaskManager;
+import service.Managers;
+import service.TaskManager;
 import main.Status;
 import org.junit.jupiter.api.Test;
 

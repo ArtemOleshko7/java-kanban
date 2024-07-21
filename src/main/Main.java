@@ -1,10 +1,10 @@
 package main;
 import exception.ManagerSaveException;
-import Model.Epic;
-import Model.Subtask;
-import Model.Task;
-import Service.Managers;
-import Service.TaskManager;
+import model.Epic;
+import model.Subtask;
+import model.Task;
+import service.Managers;
+import service.TaskManager;
 
 public class Main {
 

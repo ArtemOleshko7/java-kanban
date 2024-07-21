@@ -1,7 +1,7 @@
-import Model.Task;
-import Service.HistoryManager;
-import Service.InMemoryHistoryManager;
-import Service.Managers;
+import model.Task;
+import service.HistoryManager;
+import service.InMemoryHistoryManager;
+import service.Managers;
 import main.*;
 import org.junit.jupiter.api.Test;
 

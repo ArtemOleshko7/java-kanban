@@ -1,4 +1,4 @@
-package Model;
+package model;
 
 import main.Status;
 import main.TaskType;

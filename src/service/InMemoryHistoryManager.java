@@ -1,6 +1,6 @@
-package Service;
+package service;
 
-import Model.Task;
+import model.Task;
 import main.Node;
 
 import java.util.ArrayList;

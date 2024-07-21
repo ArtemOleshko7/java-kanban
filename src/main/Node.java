@@ -1,6 +1,6 @@
 package main;
 
-import Model.Task;
+import model.Task;
 
 public class Node<T extends Task> {
     private T task;
