@@ -8,14 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class EpicTest {
     @Test
     void shouldHaveSameId() {
-        Epic epic = new Epic("Уборка", "Помыть посуду", Status.DONE);
-        Task epic1 = new Epic("Готовка", "Приготвоить обед", Status.NEW);
-
-        epic.setId(5);
-        epic1.setId(5);
+        Epic epic = new Epic(5, "Уборка", "Помыть посуду", Status.DONE);
+        Epic epic1 = new Epic(5, "Готовка", "Приготовить обед", Status.NEW);
 
         assertEquals(epic.getId(), epic1.getId());
     }
-
-
 }

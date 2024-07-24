@@ -1,10 +1,10 @@
 package service;
 
 import exception.ManagerSaveException;
+import main.Status;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import main.Status;
 
 import java.util.*;
 
@@ -32,16 +32,34 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addTask(Task task) {
+        if (task == null) {
+            throw new IllegalArgumentException("Задача не может быть null");
+        }
         task.setId(generateId());
+        System.out.println("Добавляем задачу с ID: " + task.getId());
+
         tasks.put(task.getId(), task);
+        System.out.println("Задача добавлена. Текущий размер коллекции: " + tasks.size());
     }
 
     @Override
     public int createTask(Task task) throws ManagerSaveException {
-        idCounter++;
-        task.setId(idCounter);
-        tasks.put(task.getId(), task);
-        return idCounter;
+        if (task == null) {
+            throw new IllegalArgumentException("Задача не может быть null.");
+        }
+
+        int newId = generateId();
+        task.setId(newId);
+        tasks.put(newId, task);
+
+        // Логирование
+        if (!tasks.containsKey(task.getId())) {
+            System.err.println("Ошибка: задача не добавлена в коллекцию!");
+        } else {
+            System.out.println("Задача успешно добавлена в коллекцию. ID: " + task.getId());
+        }
+
+        return task.getId();
     }
 
     @Override
@@ -83,12 +101,17 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllTask() {
         tasks.clear();
+        // Обновляем статусы всех эпиков, так как задачи могли измениться
+        for (Epic epic : epics.values()) {
+            updateStatusEpic(epic);
+        }
     }
 
     @Override
     public void addSubtask(Subtask subtask) {
         if (subtask == null) {
-            throw new IllegalArgumentException("Подзадача должна быть связана с эпиком.");
+            System.out.println("Ошибка: подзадача не может быть null.");
+            return; // Уходим из метода, если подзадача null
         }
 
         int subtaskId = generateId();
@@ -96,11 +119,12 @@ public class InMemoryTaskManager implements TaskManager {
 
         Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
-            subtasks.put(subtaskId, subtask);
-            epic.addSubtaskIds(subtaskId, subtask);
-            updateStatusEpic(epic);
+            subtasks.put(subtaskId, subtask); // Добавляем подзадачу
+            epic.addSubtaskIds(subtaskId, subtask); // Добавляем ID подзадачи в эпик
+            updateStatusEpic(epic); // Обновление статуса эпика
+            System.out.println("Подзадача добавлена. ID: " + subtaskId);
         } else {
-            throw new NoSuchElementException("Такого эпика нет");
+            System.out.println("Ошибка: эпик с ID " + subtask.getEpicId() + " не найден.");
         }
     }
 
@@ -109,10 +133,12 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtask == null) {
             throw new ManagerSaveException("Подзадача не может быть null.");
         }
-        idCounter++;
-        subtask.setId(idCounter);
-        subtasks.put(subtask.getId(), subtask);
-        return idCounter;
+
+        int newId = generateId();
+        subtask.setId(newId);
+        subtasks.put(newId, subtask);
+
+        return newId;
     }
 
     @Override
@@ -164,15 +190,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteSubtask(int idCounter) {
-        Subtask subtask = subtasks.get(idCounter);
+    public void deleteSubtask(int subtaskId) {
+        Subtask subtask = subtasks.remove(subtaskId);
+
         if (subtask != null) {
             Epic epic = epics.get(subtask.getEpicId());
-            epic.getSubtaskIds().remove((Integer) subtask.getId());
-            updateStatusEpic(epic);
-            subtasks.remove(idCounter);
+            if (epic != null) {
+                epic.getSubtaskIds().remove(Integer.valueOf(subtaskId));
+                updateStatusEpic(epic); // Обновление статуса эпика
+            } else {
+                System.out.println("Ошибка: эпик с ID " + subtask.getEpicId() + " не найден.");
+            }
         } else {
-            System.out.println("Такой подзадачи нет");
+            System.out.println("Ошибка: подзадача с ID " + subtaskId + " не найдена.");
         }
     }
 
@@ -186,10 +216,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addEpic(Epic epic) {
+    public void addEpic(Epic epic) throws ManagerSaveException {
+        if (epic == null) {
+            throw new ManagerSaveException("Эпик не может быть null.");
+        }
+
         int epicId = generateId();
         epic.setId(epicId);
-        epics.put(epicId, epic);
+        epics.put(epicId, epic); // Добавляем эпик
     }
 
     @Override
@@ -197,10 +231,12 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             throw new ManagerSaveException("Эпик не может быть null.");
         }
-        idCounter++;
-        epic.setId(idCounter);
-        epics.put(epic.getId(), epic);
-        return idCounter;
+
+        int newId = generateId();
+        epic.setId(newId);
+        epics.put(newId, epic);
+
+        return newId;
     }
 
     @Override
@@ -252,44 +288,50 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllEpics() {
+        // Прежде чем удалить эпики, обновляем статусы, если это необходимо
+        for (Epic epic : epics.values()) {
+            updateStatusEpic(epic);
+        }
+        // Очищаем коллекции эпиков и подзадач
         subtasks.clear();
         epics.clear();
     }
 
-    private void updateStatusEpic(Epic epic) {
-        if (epics.containsKey(epic.getId())) {
-            if (epic.getSubtaskIds().isEmpty()) {
-                epic.setStatus(Status.NEW);
-            } else {
-                List<Subtask> subtasksNew = new ArrayList<>();
-                int countDone = 0;
-                int countNew = 0;
+    public void updateStatusEpic(Epic epic) {
+        List<Integer> subtaskIds = epic.getSubtaskIds();
 
-                for (int i = 0; i < epic.getSubtaskIds().size(); i++) {
-                    subtasksNew.add(subtasks.get(epic.getSubtaskIds().get(i)));
-                }
-                for (Subtask subtask : subtasksNew) {
-                    if (subtask.getStatus() == Status.DONE) {
-                        countDone++;
-                    }
-                    if (subtask.getStatus() == Status.NEW) {
-                        countNew++;
-                    }
-                    if (subtask.getStatus() == Status.IN_PROGRESS) {
-                        epic.setStatus(Status.IN_PROGRESS);
-                        return;
-                    }
-                }
-                if (countDone == epic.getSubtaskIds().size()) {
-                    epic.setStatus(Status.DONE);
-                } else if (countNew == epic.getSubtaskIds().size()) {
-                    epic.setStatus(Status.NEW);
-                } else {
-                    epic.setStatus(Status.IN_PROGRESS);
-                }
+        if (subtaskIds.isEmpty()) {
+            epic.setStatus(Status.NEW);
+            return;
+        }
+
+        int countDone = 0;
+        int countInProgress = 0;
+        int countNew = 0;
+
+        for (int subtaskId : subtaskIds) {
+            Subtask subtask = subtasks.get(subtaskId);
+            Status subtaskStatus = subtask.getStatus();
+
+            switch (subtaskStatus) {
+                case DONE:
+                    countDone++;
+                    break;
+                case IN_PROGRESS:
+                    countInProgress++;
+                    break;
+                case NEW:
+                    countNew++;
+                    break;
             }
+        }
+
+        if (countDone == subtaskIds.size()) {
+            epic.setStatus(Status.DONE);
+        } else if (countNew == subtaskIds.size()) {
+            epic.setStatus(Status.NEW);
         } else {
-            System.out.println("Эпик не найден");
+            epic.setStatus(Status.IN_PROGRESS);
         }
     }
 

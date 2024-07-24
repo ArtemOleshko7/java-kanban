@@ -3,15 +3,23 @@ package model;
 import main.Status;
 import main.TaskType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class Epic extends Task {
     private ArrayList<Integer> subtaskIds = new ArrayList<>();
     private Map<Integer, Subtask> subtasks = new HashMap<>();
+    private final TaskType type = TaskType.EPIC_TASK;
 
-    public Epic(String name, String description, Status status) {
-        super(null, name, description, status); // ID будет присвоен позже
-        this.subtaskIds = new ArrayList<>(); // Инициализация списка подзадач
+    public Epic(Integer id, String name, String description, Status status) {
+        super(id, name, description, status);
+    }
+
+    @Override
+    public TaskType getType() {
+        return this.type;
     }
 
     public ArrayList<Integer> getSubtaskIds() {
@@ -30,20 +38,11 @@ public class Epic extends Task {
         }
     }
 
-    @Override
-    public TaskType getType() {
-        return TaskType.EPIC_TASK;
-    }
 
     @Override
     public String toString() {
-        return "main.Epic{" +
-                "subtaskIDs=" + subtaskIds +
-                ", description='" + getDescription() + '\'' +
-                ", ID=" + getId() +
-                ", name='" + getName() + '\'' +
-                ", status=" + getStatus() +
-                '}';
+        return String.format("Epic{id=%d, name='%s', description='%s', status=%s, subtaskIds=%s}",
+                getId(), getName(), getDescription(), getStatus(), subtaskIds);
     }
 
     @Override

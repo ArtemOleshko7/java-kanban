@@ -1,4 +1,5 @@
 package main;
+
 import exception.ManagerSaveException;
 import model.Epic;
 import model.Subtask;
@@ -7,18 +8,19 @@ import service.Managers;
 import service.TaskManager;
 
 public class Main {
-
     public static void main(String[] args) {
         TaskManager taskManager = Managers.getDefault();
 
         try {
             Task task1 = new Task(1, "task1", "desc1", Status.NEW);
             Task task2 = new Task(2, "task2", "desc2", Status.NEW);
-            Epic epic1 = new Epic("Epic1", "descrEpic1", Status.NEW);
-            Subtask subtask1 = new Subtask("SubTask1", "descSub1", Status.NEW, epic1.getId());
-            Subtask subtask2 = new Subtask("SubTask2", "descSub2", Status.NEW, epic1.getId());
-            Subtask subtask3 = new Subtask("SubTask3", "descSub3", Status.NEW, epic1.getId());
-            Epic epic2 = new Epic("Epic2", "descrEpic2", Status.NEW);
+
+            // Корректируем создание эпиков
+            Epic epic1 = new Epic(3, "Epic1", "descrEpic1", Status.NEW);
+            Subtask subtask1 = new Subtask(4, "SubTask1", "descSub1", Status.NEW, epic1.getId());
+            Subtask subtask2 = new Subtask(5, "SubTask2", "descSub2", Status.NEW, epic1.getId());
+            Subtask subtask3 = new Subtask(6, "SubTask3", "descSub3", Status.NEW, epic1.getId());
+            Epic epic2 = new Epic(7, "Epic2", "descrEpic2", Status.NEW);
 
             taskManager.createTask(task1);
             taskManager.createTask(task2);
@@ -35,9 +37,7 @@ public class Main {
             // Получаем задачи по идентификаторам
             System.out.println(taskManager.getTask(2));
             System.out.println(taskManager.getEpic(3));
-            System.out.println(taskManager.getEpic(3));
-            System.out.println(taskManager.getEpic(3));
-            System.out.println(taskManager.getTask(2));
+            System.out.println(taskManager.getSubtask(4));
             System.out.println(taskManager.getHistory());
 
             // Удаляем задачу

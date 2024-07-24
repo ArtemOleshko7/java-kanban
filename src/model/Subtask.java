@@ -3,12 +3,13 @@ package model;
 import main.Status;
 import main.TaskType;
 
+
 public class Subtask extends Task {
 
     private Integer epicId;
 
     public Subtask(String name, String description, Status status, Integer epicId) {
-        super(null, name, description, status); // id будет присвоен позже
+        super(1, name, description, status); // id будет присвоен позже
         this.epicId = epicId;
     }
 
@@ -26,14 +27,23 @@ public class Subtask extends Task {
         return epicId;
     }
 
+    public void updateStatus(Status newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Статус не может быть null.");
+        }
+
+        if (this.status == Status.NEW && newStatus == Status.IN_PROGRESS) {
+            this.status = newStatus;
+        } else if (this.status == Status.IN_PROGRESS && newStatus == Status.DONE) {
+            this.status = newStatus;
+        } else {
+            throw new IllegalStateException("Неверный переход статуса для подзадачи.");
+        }
+    }
+
     @Override
     public String toString() {
-        return "SubTask{" + "\n" +
-                "EpicId =" + epicId + "," +
-                "main.Status=" + super.getStatus() + "," +
-                "Id=" + super.getId() + "," +
-                "Name=" + super.getName() + "," +
-                "Description=" + super.getDescription() + "," +
-                '}' + "\n";
+        return String.format("SubTask{\nEpic Id=%d, Status=%s, Id=%d, Name='%s', Description='%s'}\n",
+                epicId, super.getStatus(), super.getId(), super.getName(), super.getDescription());
     }
 }
