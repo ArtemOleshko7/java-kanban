@@ -14,7 +14,7 @@ public class Subtask extends Task {
     }
 
     public Subtask(Integer id, String name, String description, Status status, Integer epicId) {
-        super(id, name, description, status); // Добавьте тип задачи здесь
+        super(id, name, description, status);
         this.epicId = epicId;
     }
 

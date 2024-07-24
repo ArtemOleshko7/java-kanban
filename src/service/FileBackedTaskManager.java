@@ -24,29 +24,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this(new InMemoryHistoryManager(), fileName);
     }
 
-    private static final int ID_INDEX = 1; // Начинаем с 1
-    private static final int TYPE_INDEX = 2;
-    private static final int NAME_INDEX = 3;
-    private static final int DESCRIPTION_INDEX = 4;
-    private static final int STATUS_INDEX = 5;
-    private static final int SUBTASK_ID_INDEX = 6; // Для SUB_TASK и EPIC_TASK
+    private static final int ID_INDEX = 0; // ID находится на индексе 0
+    private static final int TYPE_INDEX = 1; // Тип задачи на индексе 1
+    private static final int NAME_INDEX = 2; // Имя на индексе 2
+    private static final int STATUS_INDEX = 3; // Статус на индексе 3
+    private static final int DESCRIPTION_INDEX = 4; // Описание на индексе 4
+    private static final int SUBTASK_ID_INDEX = 5; // Для SUB_TASK и EPIC_TASK
 
     public static Task taskFromString(String line, InMemoryTaskManager taskManager) {
-        System.out.println("Parsing line: " + line);
+        System.out.println("Обработка строки задачи: " + line);
+
         String[] parts = line.split(",");
 
-        if (parts.length < 6) {
-            throw new IllegalArgumentException("Недостаточно параметров в строке: " + line);
-        }
-
-        int id = Integer.parseInt(parts[ID_INDEX]);
+        int id = Integer.parseInt(parts[ID_INDEX].trim());
         String type = parts[TYPE_INDEX].trim();
-        String name = parts[NAME_INDEX];
-        String description = parts[DESCRIPTION_INDEX];
+        String name = parts[NAME_INDEX].trim();
+        String description = parts[DESCRIPTION_INDEX].trim();
         Status status;
 
         try {
-            status = Status.valueOf(parts[STATUS_INDEX]);
+            status = Status.valueOf(parts[STATUS_INDEX].trim());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Некорректный статус: " + parts[STATUS_INDEX]);
         }
@@ -54,26 +51,37 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         switch (type) {
             case "EPIC_TASK":
                 Epic epic = new Epic(id, name, description, status);
-                for (int i = SUBTASK_ID_INDEX; i < parts.length; i++) {
-                    int subtaskId = Integer.parseInt(parts[i]);
-                    Subtask subtask = taskManager.getSubtask(subtaskId);
-                    if (subtask != null) {
-                        epic.addSubtaskIds(subtaskId, subtask);
-                    } else {
-                        throw new IllegalArgumentException("Подзадача с ID " + subtaskId + " не найдена.");
+                // Можно не выбрасывать исключение, если подзадачи не указаны
+                if (parts.length > SUBTASK_ID_INDEX) {
+                    for (int i = SUBTASK_ID_INDEX; i < parts.length; i++) {
+                        int subtaskId = Integer.parseInt(parts[i].trim());
+                        Subtask subtask = taskManager.getSubtask(subtaskId);
+                        if (subtask != null) {
+                            epic.addSubtaskIds(subtaskId, subtask);
+                        } else {
+                            System.out.println("Подзадача с ID " + subtaskId + " не найдена для Эпика " + id);
+                        }
                     }
+                } else {
+                    System.out.println("Эпик ID " + id + " создан без подзадач.");
                 }
                 return epic;
 
             case "SUB_TASK":
-                if (parts.length != 7) { // Изменено на 7 для Subtask
+                if (parts.length < 6) { // Проверка на количество параметров для Subtask
                     throw new IllegalArgumentException("Неверное количество параметров для Subtask");
                 }
-                return new Subtask(id, name, description, status, Integer.parseInt(parts[SUBTASK_ID_INDEX]));
+                int epicId = Integer.parseInt(parts[SUBTASK_ID_INDEX].trim()); // ID родительского эпика
+                if (taskManager.getEpic(epicId) == null) {
+                    throw new IllegalArgumentException("Эпик с ID " + epicId + " не найден для подзадачи");
+                }
+                return new Subtask(id, name, description, status, epicId);
 
-            case "TASK": // Добавлено для обработки обычной задачи
-            default: // Обработка по умолчанию для других типов
+            case "TASK":
                 return new Task(id, name, description, status);
+
+            default:
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
         }
     }
 
@@ -127,6 +135,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         for (String line : lines) {
             Task task = taskFromString(line, this); // Передаем текущий менеджер задач
+            System.out.println("Создана задача: " + task); // Отладка
 
             if (task instanceof Epic) {
                 Epic epic = (Epic) task;
@@ -135,6 +144,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
                 epicIds.add(epic.getId());
                 epics.put(epic.getId(), epic); // Добавляем в список эпиков
+                System.out.println("Добавлен эпик: " + epic); // Отладка
             } else {
                 if (taskIds.contains(task.getId())) {
                     throw new ManagerSaveException("Задача с ID " + task.getId() + " уже существует.");
@@ -149,7 +159,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                                 " не принадлежит существующему эпике.");
                     }
                     subtasks.put(subtask.getId(), subtask); // Добавляем в список подзадач
-                    epics.get(subtask.getEpicId()).addSubtaskIds(subtask.getId(), subtask); // Добавляем подзадачу в эпик
+                    epics.get(subtask.getEpicId()).addSubtaskIds(subtask.getId(), subtask);
+
+                    // Отладка подзадачи
+                    System.out.println("Добавлена подзадача: " + subtask +
+                            " к эпику с ID: " + subtask.getEpicId());
                 }
             }
         }
@@ -157,6 +171,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         // Обновляем статусы всех эпиков после загрузки
         for (Epic epic : epics.values()) {
             updateStatusEpic(epic);
+            System.out.println("Обновлен статус эпика: " + epic); // Отладка
         }
     }
 

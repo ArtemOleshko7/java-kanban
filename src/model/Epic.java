@@ -4,13 +4,10 @@ import main.Status;
 import main.TaskType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class Epic extends Task {
-    private ArrayList<Integer> subtaskIds = new ArrayList<>();
-    private Map<Integer, Subtask> subtasks = new HashMap<>();
+    private final ArrayList<Integer> subtaskIds = new ArrayList<>();
     private final TaskType type = TaskType.EPIC_TASK;
 
     public Epic(Integer id, String name, String description, Status status) {
@@ -30,12 +27,15 @@ public class Epic extends Task {
         if (subtask == null) {
             throw new IllegalArgumentException("Подзадача не может быть null.");
         }
+        if (id <= 0) {
+            throw new IllegalArgumentException("ID подзадачи должен быть больше нуля.");
+        }
         if (!subtaskIds.contains(id)) {
             subtaskIds.add(id);
-            subtasks.put(id, subtask);
         } else {
             throw new IllegalArgumentException("Подзадача с таким ID уже добавлена.");
         }
+
     }
 
 
