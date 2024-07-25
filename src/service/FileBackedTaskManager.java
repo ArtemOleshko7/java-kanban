@@ -13,11 +13,12 @@ import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private final File taskManagerFile;
+    public final File taskManagerFile;
 
     public FileBackedTaskManager(HistoryManager historyManager, String fileName) {
         super(historyManager);
         this.taskManagerFile = new File(fileName);
+        loadFromFile(); // Загружаем данные из файла при создании
     }
 
     public FileBackedTaskManager(String fileName) {
@@ -51,13 +52,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         switch (type) {
             case "EPIC_TASK":
                 Epic epic = new Epic(id, name, description, status);
-                // Можно не выбрасывать исключение, если подзадачи не указаны
                 if (parts.length > SUBTASK_ID_INDEX) {
                     for (int i = SUBTASK_ID_INDEX; i < parts.length; i++) {
                         int subtaskId = Integer.parseInt(parts[i].trim());
                         Subtask subtask = taskManager.getSubtask(subtaskId);
                         if (subtask != null) {
-                            epic.addSubtaskIds(subtaskId, subtask);
+                            epic.addSubtaskId(subtaskId);
                         } else {
                             System.out.println("Подзадача с ID " + subtaskId + " не найдена для Эпика " + id);
                         }
@@ -68,14 +68,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 return epic;
 
             case "SUB_TASK":
-                if (parts.length < 6) { // Проверка на количество параметров для Subtask
+                if (parts.length < 5) {
                     throw new IllegalArgumentException("Неверное количество параметров для Subtask");
                 }
-                int epicId = Integer.parseInt(parts[SUBTASK_ID_INDEX].trim()); // ID родительского эпика
-                if (taskManager.getEpic(epicId) == null) {
+                int epicId = Integer.parseInt(parts[SUBTASK_ID_INDEX].trim());
+                Epic parentEpic = taskManager.getEpic(epicId);
+
+                if (parentEpic == null) {
                     throw new IllegalArgumentException("Эпик с ID " + epicId + " не найден для подзадачи");
                 }
-                return new Subtask(id, name, description, status, epicId);
+
+                // Изменение создания Subtask, передаем параметры вместо объекта
+                int newId = InMemoryTaskManager.generateId(); // генерируем новый ID для подзадачи
+                taskManager.createSubtask(name, description, status, epicId); // сохраняем подзадачу через менеджер
+                Subtask subtask = new Subtask(newId, name, description, status, epicId); // создаем Subtask с новым ID
+                parentEpic.addSubtaskId(newId); // Добавляем ID подзадачи к эпику
+                return subtask;
 
             case "TASK":
                 return new Task(id, name, description, status);
@@ -85,17 +93,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-
+    @Override
     public void save() throws ManagerSaveException {
         try (Writer writer = new FileWriter(taskManagerFile, false)) {
+            // Сначала сохраняем задач
             for (Task task : tasks.values()) {
                 writer.write(toString(task) + "\n");
             }
+
+            // Затем сохраняем эпики
             for (Epic epic : epics.values()) {
                 writer.write(toString(epic) + "\n");
-            }
-            for (Subtask subtask : subtasks.values()) {
-                writer.write(toString(subtask) + "\n");
+                // Сохраняем также подзадачи, принадлежащие этому эпику
+                for (Integer subtaskId : epic.getSubtaskIds()) {
+                    Subtask subtask = subtasks.get(subtaskId);
+                    if (subtask != null) {
+                        writer.write(toString(subtask) + "\n");
+                    }
+                }
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Error saving to file: " + taskManagerFile + ". " + e.getMessage());
@@ -159,7 +174,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                                 " не принадлежит существующему эпике.");
                     }
                     subtasks.put(subtask.getId(), subtask); // Добавляем в список подзадач
-                    epics.get(subtask.getEpicId()).addSubtaskIds(subtask.getId(), subtask);
+                    epics.get(subtask.getEpicId()).addSubtaskId(subtask.getId()); // Добавляем ID подзадачи
 
                     // Отладка подзадачи
                     System.out.println("Добавлена подзадача: " + subtask +
@@ -167,7 +182,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
         }
-
         // Обновляем статусы всех эпиков после загрузки
         for (Epic epic : epics.values()) {
             updateStatusEpic(epic);
@@ -182,8 +196,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             while ((line = br.readLine()) != null) {
                 lines.add(line);
             }
+        } catch (FileNotFoundException e) {
+            throw new ManagerSaveException("File not found: " + taskManagerFile);
         } catch (IOException e) {
-            throw new ManagerSaveException(e.getMessage());
+            throw new ManagerSaveException("Error reading file: " + e.getMessage());
         }
         return lines;
     }
@@ -220,59 +236,57 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public void addTask(Task task) {
-        if (task != null) {
-            task.setId(generateId());
-            System.out.println("Добавляем задачу с ID: " + task.getId());
+        super.addTask(task); // Вызов родительского метода для добавления задачи
 
-            // Используем setTask для добавления задачи
-            setTask(task);
-
-            System.out.println("Задача добавлена. Текущий размер коллекции: " + tasks.size());
-
-            try {
-                save();
-            } catch (ManagerSaveException e) {
-                System.out.println("Ошибка при сохранении данных: " + e.getMessage());
-            }
-        } else {
-            System.out.println("Ошибка: задача не может быть null.");
+        // Сохранение состояния после добавления задачи
+        try {
+            save();
+        } catch (ManagerSaveException e) {
+            System.out.println("Ошибка при сохранении данных: " + e.getMessage());
         }
     }
 
     @Override
     public void addSubtask(Subtask subtask) {
-        if (subtask != null) {
-            subtask.setId(generateId()); // Генерация ID для подзадачи
-            System.out.println("Добавляем подзадачу с ID: " + subtask.getId());
-
-            // Используем setTask для добавления подзадачи
-            setTask(subtask);
-
-            System.out.println("Подзадача добавлена. Текущий размер коллекции подзадач: " + subtasks.size());
-
-            try {
-                save(); // Сохранение после добавления подзадачи
-            } catch (ManagerSaveException e) {
-                System.out.println("Ошибка при сохранении данных: " + e.getMessage());
-            }
-        } else {
+        if (subtask == null) {
             System.out.println("Ошибка: подзадача не может быть null.");
+            return;
+        }
+
+        subtask.setId(generateId());
+        System.out.println("Добавляем подзадачу с ID: " + subtask.getId());
+
+        subtasks.put(subtask.getId(), subtask);
+
+        Epic epicTask = epics.get(subtask.getEpicId());
+        if (epicTask != null) {
+            epicTask.addSubtaskId(subtask.getId());
+        } else {
+            System.out.println("Ошибка: Эпик с ID " + subtask.getEpicId() + " не найден.");
+        }
+
+        System.out.println("Подзадача добавлена. Текущий размер коллекции подзадач: " + subtasks.size());
+
+        // Сохранение состояния
+        try {
+            save();
+        } catch (ManagerSaveException e) {
+            System.out.println("Ошибка при сохранении данных: " + e.getMessage());
         }
     }
+
 
     @Override
     public void addEpic(Epic epic) {
         if (epic != null) {
-            epic.setId(generateId()); // Генерация ID для эпика
+            epic.setId(generateId());
             System.out.println("Добавляем эпик с ID: " + epic.getId());
 
-            // Используем setTask для добавления эпика
-            setTask(epic);
-
+            epics.put(epic.getId(), epic);
             System.out.println("Эпик добавлен. Текущий размер коллекции эпиков: " + epics.size());
 
             try {
-                save(); // Сохранение после добавления эпика
+                save();
             } catch (ManagerSaveException e) {
                 System.out.println("Ошибка при сохранении данных: " + e.getMessage());
             }
@@ -283,33 +297,64 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
 
     @Override
-    public int createTask(Task task) throws ManagerSaveException {
-        if (task == null) {
-            throw new IllegalArgumentException("Ошибка: задача не может быть null.");
+    public int createTask(String name, String description, Status status) throws ManagerSaveException {
+        int newId = super.createTask(name, description, status); // Вызов родительского метода для создания задачи
+
+        // Сохранение состояния после создания новой задачи
+        try {
+            save();
+        } catch (ManagerSaveException e) {
+            System.out.println("Ошибка при сохранении данных: " + e.getMessage());
+            throw e; // Бросаем исключение для дальнейшей обработки
         }
-        int id = super.createTask(task);
-        save();
-        return id;
+
+        return newId;
     }
 
     @Override
-    public int createSubtask(Subtask subTask) throws ManagerSaveException {
-        if (subTask == null) {
-            throw new IllegalArgumentException("Ошибка: подзадача не может быть null.");
+    public int createSubtask(String name, String description, Status status, int epicId) throws ManagerSaveException {
+        if (name == null || description == null || status == null) {
+            throw new ManagerSaveException("Параметры не могут быть null.");
         }
-        int id = super.createSubtask(subTask);
-        save();
-        return id;
+
+        Epic epicTask = epics.get(epicId);
+        if (epicTask == null) {
+            throw new ManagerSaveException("Ошибка: Эпик с ID " + epicId + " не найден.");
+        }
+
+        int newId = generateId(); // Генерация нового ID
+        Subtask subtask = new Subtask(newId, name, description, status, epicId);
+        subtasks.put(newId, subtask);
+
+        // Сохранение состояния после создания новой подзадачи
+        try {
+            save();
+        } catch (ManagerSaveException e) {
+            System.out.println("Ошибка при сохранении данных: " + e.getMessage());
+        }
+
+        return newId;
     }
 
+
     @Override
-    public int createEpic(Epic epic) throws ManagerSaveException {
-        if (epic == null) {
-            throw new IllegalArgumentException("Ошибка: эпик не может быть null.");
+    public int createEpic(String name, String description, Status status) throws ManagerSaveException {
+        if (name == null || description == null || status == null) {
+            throw new ManagerSaveException("Параметры не могут быть null.");
         }
-        int id = super.createEpic(epic);
-        save();
-        return id;
+
+        int newId = generateId(); // Генерация нового ID
+        Epic epic = new Epic(newId, name, description, status);
+        epics.put(newId, epic);
+
+        // Добавьте сохранение состояния после создания нового эпика
+        try {
+            save();
+        } catch (ManagerSaveException e) {
+            System.out.println("Ошибка при сохранении данных: " + e.getMessage());
+        }
+
+        return newId;
     }
 
     @Override
@@ -399,21 +444,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    protected void setTask(Task task) {
-        tasks.put(task.getId(), task); // Добавляем задачу в общую коллекцию
-
-        if (task instanceof Epic) {
-            epics.put(task.getId(), (Epic) task);
-        } else if (task instanceof Subtask) {
-            Subtask subtask = (Subtask) task;
-            subtasks.put(subtask.getId(), subtask);
-
-            Epic epicTask = epics.get(subtask.getEpicId());
-            if (epicTask != null) {
-                epicTask.addSubtaskIds(subtask.getId(), subtask);
-            }
-        }
-    }
 }
 
 

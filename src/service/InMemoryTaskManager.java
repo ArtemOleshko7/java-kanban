@@ -13,7 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Subtask> subtasks;
     protected final Map<Integer, Epic> epics;
     protected HistoryManager historyManager;
-    int idCounter = 0;
+    static int idCounter = 0;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.tasks = new HashMap<>();
@@ -26,7 +26,7 @@ public class InMemoryTaskManager implements TaskManager {
         this(Managers.getDefaultHistory());  // Вызов другого конструктора с null
     }
 
-    public int generateId() {
+    public static int generateId() {
         return idCounter++;
     }
 
@@ -35,31 +35,26 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             throw new IllegalArgumentException("Задача не может быть null");
         }
-        task.setId(generateId());
+        // Проверка на наличие ID; если ID не задан, генерируем новый
+        if (task.getId() == 0) {
+            task.setId(generateId());
+        }
         System.out.println("Добавляем задачу с ID: " + task.getId());
 
         tasks.put(task.getId(), task);
         System.out.println("Задача добавлена. Текущий размер коллекции: " + tasks.size());
     }
 
+
     @Override
-    public int createTask(Task task) throws ManagerSaveException {
-        if (task == null) {
-            throw new IllegalArgumentException("Задача не может быть null.");
+    public int createTask(String name, String description, Status status) throws ManagerSaveException {
+        if (name == null || description == null || status == null) {
+            throw new IllegalArgumentException("Параметры не могут быть null.");
         }
-
         int newId = generateId();
-        task.setId(newId);
+        Task task = new Task(newId, name, description, status);
         tasks.put(newId, task);
-
-        // Логирование
-        if (!tasks.containsKey(task.getId())) {
-            System.err.println("Ошибка: задача не добавлена в коллекцию!");
-        } else {
-            System.out.println("Задача успешно добавлена в коллекцию. ID: " + task.getId());
-        }
-
-        return task.getId();
+        return newId;
     }
 
     @Override
@@ -98,12 +93,24 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    public void save() {
+        // Пустая реализация, чтобы переопределить в FileBackedTaskManager
+    }
+
     @Override
     public void deleteAllTask() {
-        tasks.clear();
-        // Обновляем статусы всех эпиков, так как задачи могли измениться
+        tasks.clear(); // Очистка задач
+
+        // Обновление статусов всех эпиков
         for (Epic epic : epics.values()) {
             updateStatusEpic(epic);
+        }
+
+        // Сохранение состояния после удаления задач
+        try {
+            save();
+        } catch (ManagerSaveException e) {
+            System.out.println("Ошибка при сохранении данных: " + e.getMessage());
         }
     }
 
@@ -111,17 +118,20 @@ public class InMemoryTaskManager implements TaskManager {
     public void addSubtask(Subtask subtask) {
         if (subtask == null) {
             System.out.println("Ошибка: подзадача не может быть null.");
-            return; // Уходим из метода, если подзадача null
+            return;
         }
 
-        int subtaskId = generateId();
-        subtask.setId(subtaskId);
+        if (subtask.getId() == 0) { // Проверяем, установлен ли ID
+            subtask.setId(generateId());
+        }
+
+        int subtaskId = subtask.getId(); // Используем установленный ID
 
         Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
-            subtasks.put(subtaskId, subtask); // Добавляем подзадачу
-            epic.addSubtaskIds(subtaskId, subtask); // Добавляем ID подзадачи в эпик
-            updateStatusEpic(epic); // Обновление статуса эпика
+            subtasks.put(subtaskId, subtask);
+            epic.addSubtaskId(subtaskId);
+            updateStatusEpic(epic);
             System.out.println("Подзадача добавлена. ID: " + subtaskId);
         } else {
             System.out.println("Ошибка: эпик с ID " + subtask.getEpicId() + " не найден.");
@@ -129,23 +139,25 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int createSubtask(Subtask subtask) throws ManagerSaveException {
-        if (subtask == null) {
-            throw new ManagerSaveException("Подзадача не может быть null.");
+    public int createSubtask(String name, String description, Status status, int epicId) throws ManagerSaveException {
+        if (name == null || description == null || status == null || epicId <= 0) {
+            throw new ManagerSaveException("Параметры не могут быть null или некорректны.");
         }
 
         int newId = generateId();
-        subtask.setId(newId);
+        Subtask subtask = new Subtask(newId, name, description, status, epicId);
         subtasks.put(newId, subtask);
-
         return newId;
     }
+
+
 
     @Override
     public void updateSubtask(int id, Subtask subtask) throws ManagerSaveException {
         if (subtask == null) {
             throw new ManagerSaveException("Подзадача не может быть null.");
         }
+
         if (subtasks.containsKey(id)) {
             subtask.setId(id); // Устанавливаем ID перед обновлением
             subtasks.put(id, subtask);
@@ -158,6 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
     public Subtask getSubtask(int id) {
         Subtask subtask = subtasks.get(id);
         if (subtask != null) {
@@ -176,17 +189,22 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Subtask> getAllSubtasksInEpic(int idCounter) {
-        if (epics.containsKey(idCounter)) {
-            List<Subtask> subtasksNew = new ArrayList<>();
-            Epic epic = epics.get(idCounter);
-            for (int i = 0; i < epic.getSubtaskIds().size(); i++) {
-                subtasksNew.add(subtasks.get(epic.getSubtaskIds().get(i)));
-            }
-            return subtasksNew;
-        } else {
-            return Collections.emptyList();
+    public List<Subtask> getAllSubtasksInEpic(int epicId) {
+        if (!epics.containsKey(epicId)) {
+            return Collections.emptyList(); // Возвращаем пустой список, если эпика не существует
         }
+
+        List<Subtask> subtasksNew = new ArrayList<>();
+        Epic epic = epics.get(epicId);
+
+        for (int subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask != null) {
+                subtasksNew.add(subtask);
+            }
+        }
+
+        return subtasksNew;
     }
 
     @Override
@@ -221,21 +239,23 @@ public class InMemoryTaskManager implements TaskManager {
             throw new ManagerSaveException("Эпик не может быть null.");
         }
 
-        int epicId = generateId();
-        epic.setId(epicId);
+        if (epic.getId() == 0) { // Проверяем, установлен ли ID
+            epic.setId(generateId());
+        }
+
+        int epicId = epic.getId(); // Используем установленный ID
         epics.put(epicId, epic); // Добавляем эпик
     }
 
     @Override
-    public int createEpic(Epic epic) throws ManagerSaveException {
-        if (epic == null) {
-            throw new ManagerSaveException("Эпик не может быть null.");
+    public int createEpic(String name, String description, Status status) throws ManagerSaveException {
+        if (name == null || description == null || status == null) {
+            throw new ManagerSaveException("Параметры не могут быть null.");
         }
 
         int newId = generateId();
-        epic.setId(newId);
+        Epic epic = new Epic(newId, name, description, status);
         epics.put(newId, epic);
-
         return newId;
     }
 
@@ -311,8 +331,12 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (int subtaskId : subtaskIds) {
             Subtask subtask = subtasks.get(subtaskId);
-            Status subtaskStatus = subtask.getStatus();
 
+            if (subtask == null) {
+                throw new IllegalArgumentException("Подзадача с ID " + subtaskId + " не найдена.");
+            }
+
+            Status subtaskStatus = subtask.getStatus();
             switch (subtaskStatus) {
                 case DONE:
                     countDone++;

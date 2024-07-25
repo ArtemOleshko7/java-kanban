@@ -2,7 +2,7 @@ package model;
 
 import main.Status;
 import main.TaskType;
-
+import service.InMemoryTaskManager;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -14,6 +14,10 @@ public class Epic extends Task {
         super(id, name, description, status);
     }
 
+    public Epic(String name, String description, Status status) {
+        this(InMemoryTaskManager.generateId(), name, description, status);
+    }
+
     @Override
     public TaskType getType() {
         return this.type;
@@ -23,10 +27,7 @@ public class Epic extends Task {
         return subtaskIds;
     }
 
-    public void addSubtaskIds(int id, Subtask subtask) {
-        if (subtask == null) {
-            throw new IllegalArgumentException("Подзадача не может быть null.");
-        }
+    public void addSubtaskId(int id) {
         if (id <= 0) {
             throw new IllegalArgumentException("ID подзадачи должен быть больше нуля.");
         }
@@ -35,7 +36,6 @@ public class Epic extends Task {
         } else {
             throw new IllegalArgumentException("Подзадача с таким ID уже добавлена.");
         }
-
     }
 
 

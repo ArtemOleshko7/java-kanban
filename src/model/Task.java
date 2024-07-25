@@ -2,6 +2,7 @@ package model;
 
 import main.Status;
 import main.TaskType;
+import service.InMemoryTaskManager;
 
 import java.util.*;
 
@@ -22,17 +23,14 @@ public class Task {
             throw new IllegalArgumentException("Статус не может быть null.");
         }
 
-        this.id = id != null ? id : -1; // Присваиваем -1, если id не был передан
+        this.id = id; // Здесь предполагается, что id всегда будет корректным
         this.name = name;
         this.description = description;
         this.status = status;
     }
 
-    public Task() {
-        this.id = -1;
-        this.name = "";
-        this.description = "";
-        this.status = Status.NEW; // Предположим, статус по умолчанию - NEW
+    public Task(String name, String description, Status status) {
+        this(InMemoryTaskManager.generateId(), name, description, status);
     }
 
     public TaskType getType() { return TaskType.TASK; }
@@ -42,6 +40,9 @@ public class Task {
     }
 
     public void setId(int id) {
+        if (this.id != 0) { // Предполагаем, что 0 - это значение по умолчанию для ID.
+            throw new IllegalStateException("ID уже установлен и не может быть изменен.");
+        }
         this.id = id;
     }
 

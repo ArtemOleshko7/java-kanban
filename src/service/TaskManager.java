@@ -1,6 +1,7 @@
 package service;
 
 import exception.ManagerSaveException;
+import main.Status;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -11,7 +12,7 @@ public interface TaskManager {
 
     void addTask(Task task) throws ManagerSaveException;
 
-    int createTask(Task task) throws ManagerSaveException;
+    int createTask(String name, String description, Status status) throws ManagerSaveException;
 
     void updateTask(int id, Task task) throws ManagerSaveException;
 
@@ -25,7 +26,7 @@ public interface TaskManager {
 
     void addSubtask(Subtask subtask);
 
-    int createSubtask(Subtask subtask) throws ManagerSaveException;
+    int createSubtask(String name, String description, Status status, int epicId) throws ManagerSaveException;
 
     void updateSubtask(int id, Subtask subtask) throws ManagerSaveException;
 
@@ -33,7 +34,7 @@ public interface TaskManager {
 
     List<Subtask> getAllSubtasks();
 
-    List<Subtask> getAllSubtasksInEpic(int idCounter);
+    List<Subtask> getAllSubtasksInEpic(int epicId);
 
     void deleteSubtask(int idCounter);
 
@@ -41,7 +42,7 @@ public interface TaskManager {
 
     void addEpic(Epic epic);
 
-    int createEpic(Epic epic) throws ManagerSaveException;
+    int createEpic(String name, String description, Status status) throws ManagerSaveException;
 
     void updateEpic(int id, Epic epic) throws ManagerSaveException;
 

@@ -2,14 +2,14 @@ package model;
 
 import main.Status;
 import main.TaskType;
-
+import service.InMemoryTaskManager;
 
 public class Subtask extends Task {
 
     private Integer epicId;
 
     public Subtask(String name, String description, Status status, Integer epicId) {
-        super(1, name, description, status); // id будет присвоен позже
+        this(InMemoryTaskManager.generateId(), name, description, status, epicId); // Вызов с использованием сгенерированного ID
         this.epicId = epicId;
     }
 
@@ -23,7 +23,7 @@ public class Subtask extends Task {
         return TaskType.SUB_TASK;
     }
 
-    public int getEpicId() {
+    public Integer getEpicId() {
         return epicId;
     }
 
