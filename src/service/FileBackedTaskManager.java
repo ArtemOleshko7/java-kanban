@@ -8,6 +8,8 @@ import model.Task;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 
@@ -15,13 +17,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public final File taskManagerFile;
 
-    public FileBackedTaskManager(HistoryManager historyManager, String fileName) {
+    public FileBackedTaskManager(HistoryManager historyManager, String fileName) throws IOException {
         super(historyManager);
         this.taskManagerFile = new File(fileName);
+        Path path = Path.of(fileName);
+        if (!Files.exists(path)){
+            Files.createFile(path);
+        }
         loadFromFile(); // Загружаем данные из файла при создании
     }
 
-    public FileBackedTaskManager(String fileName) {
+    public FileBackedTaskManager(String fileName) throws IOException  {
         this(new InMemoryHistoryManager(), fileName);
     }
 
@@ -54,7 +60,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Epic epic = new Epic(id, name, description, status);
                 if (parts.length > SUBTASK_ID_INDEX) {
                     for (int i = SUBTASK_ID_INDEX; i < parts.length; i++) {
-                        int subtaskId = Integer.parseInt(parts[i].trim());
+                        int subtaskId = Integer.parseInt(parts[i].substring(1,2).trim());
                         Subtask subtask = taskManager.getSubtask(subtaskId);
                         if (subtask != null) {
                             epic.addSubtaskId(subtaskId);
@@ -95,20 +101,28 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public void save() throws ManagerSaveException {
-        try (Writer writer = new FileWriter(taskManagerFile, false)) {
-            // Сначала сохраняем задач
-            for (Task task : tasks.values()) {
-                writer.write(toString(task) + "\n");
+        try {
+            // Проверяем, существует ли файл. Если нет, создаем его.
+            if (!taskManagerFile.exists()) {
+                taskManagerFile.createNewFile();
             }
 
-            // Затем сохраняем эпики
-            for (Epic epic : epics.values()) {
-                writer.write(toString(epic) + "\n");
-                // Сохраняем также подзадачи, принадлежащие этому эпику
-                for (Integer subtaskId : epic.getSubtaskIds()) {
-                    Subtask subtask = subtasks.get(subtaskId);
-                    if (subtask != null) {
-                        writer.write(toString(subtask) + "\n");
+            // Открываем файл для записи
+            try (Writer writer = new FileWriter(taskManagerFile, false)) {
+                // Сначала сохраняем задачи
+                for (Task task : tasks.values()) {
+                    writer.write(toString(task) + "\n");
+                }
+
+                // Затем сохраняем эпики
+                for (Epic epic : epics.values()) {
+                    writer.write(toString(epic) + "\n");
+                    // Сохраняем также подзадачи, принадлежащие этому эпику
+                    for (Integer subtaskId : epic.getSubtaskIds()) {
+                        Subtask subtask = subtasks.get(subtaskId);
+                        if (subtask != null) {
+                            writer.write(toString(subtask) + "\n");
+                        }
                     }
                 }
             }
@@ -118,6 +132,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public void loadFromFile() throws ManagerSaveException {
+        System.out.println("Загрузка данных из файла: " + taskManagerFile.getAbsolutePath());
         load();
     }
 

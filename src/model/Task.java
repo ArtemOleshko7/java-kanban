@@ -30,7 +30,7 @@ public class Task {
     }
 
     public Task(String name, String description, Status status) {
-        this(InMemoryTaskManager.generateId(), name, description, status);
+        this(null, name, description, status);
     }
 
     public TaskType getType() { return TaskType.TASK; }

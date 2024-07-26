@@ -33,7 +33,7 @@ class FileBackedTaskManagerTest {
 
 
     @Test
-    void saveAndLoadTest() throws ManagerSaveException {
+    void saveAndLoadTest() throws ManagerSaveException, IOException {
         String testFileName = "test_file.csv";
         deleteIfExists(testFileName);
 
