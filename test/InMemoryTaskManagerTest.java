@@ -1,6 +1,6 @@
 import model.Task;
 import service.InMemoryTaskManager;
-import service.Managers;
+import service.InMemoryHistoryManager;
 import service.TaskManager;
 import main.Status;
 import org.junit.jupiter.api.Test;
@@ -9,16 +9,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryTaskManagerTest {
 
-    Managers managers = new Managers();
-    TaskManager taskManager = managers.getDefault();
+    TaskManager taskManager = new InMemoryTaskManager(new InMemoryHistoryManager());  // Передаем HistoryManager
 
     @Test
     void testAddTask() {
-        InMemoryTaskManager taskManager = new InMemoryTaskManager();
-        Task task = new Task(null, "task1", "Description1", Status.NEW);
+        Task task = new Task(-1, "task1", "Description1", Status.NEW); // Изменён вызов конструктора
         taskManager.addTask(task);
 
-        Task addedTask = taskManager.getTask(task.getId()); // предположим, что есть метод для получения задачи по ID
+        Task addedTask = taskManager.getTask(task.getId()); // Предположим, что есть метод для получения задачи по ID
 
         assertNotNull(addedTask); // Проверка, что задача добавлена
         assertEquals("task1", addedTask.getName());
@@ -28,7 +26,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     void shouldBeChangedId() {
-        Task task = new Task(null, "task1", "Description1", Status.NEW);
+        Task task = new Task(-1, "task1", "Description1", Status.NEW); // Изменён вызов конструктора
         taskManager.addTask(task);
         Task task1 = taskManager.getTask(task.getId());
         assertNotEquals(50, task1.getId());
@@ -36,7 +34,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     void shouldBeEqualsAllArgumentsTaskAfterAddInManager() {
-        Task task = new Task(null, "Уборка", "Помыть посуду", Status.NEW);
+        Task task = new Task(-1, "Уборка", "Помыть посуду", Status.NEW); // Изменён вызов конструктора
         taskManager.addTask(task);
         Task task1 = taskManager.getTask(task.getId());
         assertEquals("Уборка", task1.getName());

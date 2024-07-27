@@ -3,7 +3,8 @@ import service.HistoryManager;
 import service.InMemoryHistoryManager;
 import service.InMemoryTaskManager;
 import service.Managers;
-import main.*;
+import main.Status;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,30 +12,35 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryHistoryManagerTest {
-    Managers managers = new Managers();
-    HistoryManager historyManager = managers.getDefaultHistory();
-    InMemoryTaskManager taskManager = new InMemoryTaskManager();
+    private HistoryManager historyManager;
+    private InMemoryTaskManager taskManager;
+
+    @BeforeEach
+    public void setUp() {
+        taskManager = new InMemoryTaskManager(new InMemoryHistoryManager()); // Инициализация taskManager
+        historyManager = new InMemoryHistoryManager(); // Инициализация historyManager
+    }
 
     @Test
     void add() {
-        Task task = new Task(taskManager, "Task Name", "Task Description", Status.NEW);
+        Task task = new Task(-1, "Task Name", "Task Description", Status.NEW); // Используем -1 для ID
         historyManager.add(task);
         final List<Task> history = historyManager.getHistory();
-        assertNotNull(history, "История не пустая.");
-        assertEquals(1, history.size(), "История не пустая.");
+        assertNotNull(history, "История не должна быть пустой.");
+        assertEquals(1, history.size(), "История должна содержать одну задачу.");
     }
 
     @Test
     void shouldNotEqualsTaskInHistoryAfterChange() {
-        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
-        Task task1 = new Task(taskManager, "Уборка", "Помыть посуду", Status.DONE);
-        Task task2 = new Task(taskManager, "Покупки", "Купить продукты", Status.NEW);
+        Task task1 = new Task(-1, "Уборка", "Помыть посуду", Status.DONE);
+        Task task2 = new Task(-1, "Покупки", "Купить продукты", Status.NEW);
 
         historyManager.add(task1);
         historyManager.add(task2);
 
-        assertNotEquals(historyManager.getHistory().get(0).getName(),
-                historyManager.getHistory().get(1).getName(),
-                "Не сохранялись предыдущие данные");
+        List<Task> history = historyManager.getHistory();
+        assertEquals(2, history.size(), "История должна содержать две задачи.");
+
+        assertNotEquals(history.get(0).getName(), history.get(1).getName(), "Задачи должны иметь разные названия.");
     }
 }

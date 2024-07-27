@@ -7,10 +7,18 @@ public class Node<T extends Task> {
     private Node<T> next;
     private Node<T> prev;
 
+    // Конструктор для создания узла с задачей и ссылками на соседние узлы
     public Node(Node<T> prev, T task, Node<T> next) {
+        this.prev = prev;
         this.task = task;
         this.next = next;
-        this.prev = prev;
+    }
+
+    // Новый конструктор для создания узла только с задачей
+    public Node(T task) {
+        this.task = task;
+        this.next = null;
+        this.prev = null;
     }
 
     public T getTask() {

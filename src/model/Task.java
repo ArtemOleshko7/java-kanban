@@ -2,7 +2,6 @@ package model;
 
 import main.Status;
 import main.TaskType;
-import service.InMemoryTaskManager;
 
 import java.util.Objects;
 
@@ -12,8 +11,7 @@ public class Task {
     protected String description;
     protected Status status;
 
-    public Task(InMemoryTaskManager taskManager, String name, String description, Status status) {
-
+    public Task(int id, String name, String description, Status status) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Имя не может быть пустым.");
         }
@@ -24,14 +22,14 @@ public class Task {
             throw new IllegalArgumentException("Статус не может быть null.");
         }
 
-        this.id = taskManager.generateId();
+        this.id = id; // Устанавливаем переданный ID
         this.name = name;
         this.description = description;
         this.status = status;
     }
 
     public Task(String name, String description, Status status) {
-        this(null, name, description, status);
+        this(-1, name, description, status);
     }
 
     public TaskType getType() {

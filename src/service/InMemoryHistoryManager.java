@@ -11,14 +11,15 @@ import java.util.Map;
 public class InMemoryHistoryManager implements HistoryManager {
     private Node<Task> head;
     private Node<Task> tail;
-    private Map<Integer, Node> historyMap = new HashMap<>();
+    private Map<Integer, Node<Task>> historyMap = new HashMap<>();
 
     @Override
     public void add(Task task) {
-        if (task != null) {
-            remove(task.getId());
-            linkLast(task);
+        if (task == null) {
+            return; // Не добавляем null
         }
+        remove(task.getId());
+        linkLast(task);
     }
 
     @Override
@@ -39,17 +40,16 @@ public class InMemoryHistoryManager implements HistoryManager {
         return getTasks();
     }
 
-    private final void linkLast(Task task) {
-        final Node<Task> newNode;
-        final Node<Task> oldTail = tail;
-        newNode = new Node<>(oldTail, task, null);
-        tail = newNode;
-        if (oldTail == null) {
+    private void linkLast(Task task) {
+        Node<Task> newNode = new Node<>(tail, task, null); // Передаем текущий tail как prev, и null как next
+
+        if (tail == null) { // Если список пустой
             head = newNode;
         } else {
-            oldTail.setNext(newNode);
+            tail.setNext(newNode); // Связываем предыдущий tail с новым узлом
         }
-        historyMap.put(task.getId(), newNode);
+        tail = newNode; // Обновляем tail на новый узел
+        historyMap.put(task.getId(), newNode); // Обновляем историю
     }
 
     public List<Task> getTasks() {

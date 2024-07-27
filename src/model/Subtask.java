@@ -6,17 +6,16 @@ import service.InMemoryTaskManager;
 
 public class Subtask extends Task {
 
-    private Integer epicId;
+    private final Integer epicId;
 
     public Subtask(InMemoryTaskManager taskManager, String name, String description, Status status, Integer epicId) {
-        super(taskManager, name, description, status); // Это вызовет конструктор с InMemoryTaskManager
+        super(-1, name, description, status); // Используйте -1 как ID по умолчанию
         this.epicId = epicId;
     }
 
     public Subtask(Integer id, String name, String description, Status status, Integer epicId) {
-        super(name, description, status); // Это вызовет конструктор без InMemoryTaskManager
+        super(id, name, description, status); // Передайте id
         this.epicId = epicId;
-        setId(id); // Устанавливаем ID
     }
 
     @Override

@@ -1,16 +1,18 @@
 import main.Status;
-import model.Task;
-import service.InMemoryTaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import service.InMemoryTaskManager;
+import service.InMemoryHistoryManager; // Импортируйте класс HistoryManager
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class TaskTest {
     private InMemoryTaskManager taskManager;
 
     @BeforeEach
     void setUp() {
-        taskManager = new InMemoryTaskManager(); // Инициализируем taskManager перед каждым тестом
+        taskManager = new InMemoryTaskManager(new InMemoryHistoryManager()); // Инициализируем taskManager с HistoryManager
     }
 
     @Test

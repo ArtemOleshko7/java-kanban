@@ -13,7 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Subtask> subtasks;
     protected final Map<Integer, Epic> epics;
     protected HistoryManager historyManager;
-    static int idCounter = 0;
+    protected static int idCounter = 0;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.tasks = new HashMap<>();
@@ -35,8 +35,8 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             throw new IllegalArgumentException("Задача не может быть null");
         }
-        // Удаляем проверку на ID, так как он устанавливается в конструкторе.
         tasks.put(task.getId(), task);
+        historyManager.add(task); // Регистрация задачи в истории
         System.out.println("Добавляем задачу с ID: " + task.getId());
         System.out.println("Задача добавлена. Текущий размер коллекции: " + tasks.size());
     }
@@ -47,8 +47,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (name == null || description == null || status == null) {
             throw new IllegalArgumentException("Параметры не могут быть null.");
         }
-        Task task = new Task(this, name, description, status); // передаем this для генерации ID
-        tasks.put(task.getId(), task);
+        int id = generateId(); // Генерируем ID
+        Task task = new Task(id, name, description, status); // Устанавливаем ID
+        addTask(task); // Добавляем задачу
         return task.getId();
     }
 

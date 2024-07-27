@@ -91,7 +91,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 return subtask;
 
             case "TASK":
-                return new Task(taskManager, name, description, status);
+                return new Task(-1, name, description, status); // Используем -1 для ID по умолчанию
 
             default:
                 throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
@@ -319,7 +319,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             throw new IllegalArgumentException("Параметры не могут быть null.");
         }
 
-        Task task = new Task(this, name, description, status); // Создаем новый экземпляр Task
+        Task task = new Task(-1, name, description, status); // Используем -1 для ID по умолчанию
         super.addTask(task); // Добавляем задачу через родительский метод
 
         // Сохранение состояния после создания новой задачи
