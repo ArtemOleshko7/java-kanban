@@ -10,12 +10,10 @@ public class Epic extends Task {
     private final ArrayList<Integer> subtaskIds = new ArrayList<>();
     private final TaskType type = TaskType.EPIC_TASK;
 
-    public Epic(Integer id, String name, String description, Status status) {
-        super(id, name, description, status);
-    }
-
-    public Epic(String name, String description, Status status) {
-        this(InMemoryTaskManager.generateId(), name, description, status);
+    // Новый конструктор с параметром для ID
+    public Epic(int id, InMemoryTaskManager taskManager, String name, String description, Status status) {
+        super(taskManager, name, description, status);
+        this.id = id; // Установка ID
     }
 
     @Override

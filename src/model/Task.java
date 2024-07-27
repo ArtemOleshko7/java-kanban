@@ -4,7 +4,7 @@ import main.Status;
 import main.TaskType;
 import service.InMemoryTaskManager;
 
-import java.util.*;
+import java.util.Objects;
 
 public class Task {
     protected Integer id;
@@ -12,7 +12,8 @@ public class Task {
     protected String description;
     protected Status status;
 
-    public Task(Integer id, String name, String description, Status status) {
+    public Task(InMemoryTaskManager taskManager, String name, String description, Status status) {
+
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Имя не может быть пустым.");
         }
@@ -23,7 +24,7 @@ public class Task {
             throw new IllegalArgumentException("Статус не может быть null.");
         }
 
-        this.id = id; // Здесь предполагается, что id всегда будет корректным
+        this.id = taskManager.generateId();
         this.name = name;
         this.description = description;
         this.status = status;
@@ -33,14 +34,16 @@ public class Task {
         this(null, name, description, status);
     }
 
-    public TaskType getType() { return TaskType.TASK; }
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        if (this.id != 0) { // Предполагаем, что 0 - это значение по умолчанию для ID.
+    public void setId(Integer id) {
+        if (this.id != null) { // Используем null для проверки
             throw new IllegalStateException("ID уже установлен и не может быть изменен.");
         }
         this.id = id;
@@ -62,24 +65,10 @@ public class Task {
         this.status = status;
     }
 
-    public void updateStatus(Status newStatus) {
-        if (newStatus == null) {
-            throw new IllegalArgumentException("Статус не может быть null.");
-        }
-
-        if (this.status == Status.NEW && newStatus == Status.IN_PROGRESS) {
-            this.status = newStatus;
-        } else if (this.status == Status.IN_PROGRESS && newStatus == Status.DONE) {
-            this.status = newStatus;
-        } else {
-            throw new IllegalStateException("Неверный переход статуса.");
-        }
-    }
-
     @Override
     public String toString() {
-        return String.format("Task{id=%d, name='%s', description='%s', status=%s}",
-                id, name, description, status);
+        return String.format("Task{id=%s, name='%s', description='%s', status=%s}",
+                id, name, description, status); // Изменено %d на %s, так как id может быть null
     }
 
     @Override

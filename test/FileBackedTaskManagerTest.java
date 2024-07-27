@@ -35,46 +35,40 @@ class FileBackedTaskManagerTest {
     @Test
     void saveAndLoadTest() throws ManagerSaveException, IOException {
         String testFileName = "test_file.csv";
-        deleteIfExists(testFileName);
+        File testFile = new File(testFileName);
+        if (testFile.exists() && !testFile.delete()) {
+            System.err.println("Не удалось удалить существующий файл: " + testFileName);
+        }
 
         FileBackedTaskManager manager = new FileBackedTaskManager(testFileName);
-        Epic epic = new Epic(1, "Эпик 1", "Описание эпика", Status.NEW);
+
+        // Создаем Epic с передачей экземпляра manager
+        Epic epic = new Epic(1, manager, "Эпик 1", "Описание эпика", Status.NEW);
         manager.addEpic(epic);
+
         Subtask subtask = new Subtask(2, "Подзадача 1", "Описание подзадачи", Status.NEW, epic.getId());
         manager.addSubtask(subtask);
-        manager.save();
+        manager.save(); // Сохраняем состояние менеджера в файл
 
         FileBackedTaskManager newManager = new FileBackedTaskManager(testFileName);
-        newManager.load();
+        newManager.load(); // Загружаем задачи из файла
 
-        checkEpic(epic, newManager.getEpic(epic.getId()));
-        checkSubtask(subtask, newManager.getSubtask(subtask.getId()));
+        // Проверяем, что загруженные данные соответствуют оригинальным
+        assertEquals(epic.getId(), newManager.getEpic(epic.getId()).getId());
+        assertEquals(epic.getName(), newManager.getEpic(epic.getId()).getName());
+        assertEquals(epic.getDescription(), newManager.getEpic(epic.getId()).getDescription());
+        assertEquals(epic.getStatus(), newManager.getEpic(epic.getId()).getStatus());
 
-        if (!new File(testFileName).delete()) {
+        assertEquals(subtask.getId(), newManager.getSubtask(subtask.getId()).getId());
+        assertEquals(subtask.getName(), newManager.getSubtask(subtask.getId()).getName());
+        assertEquals(subtask.getDescription(), newManager.getSubtask(subtask.getId()).getDescription());
+        assertEquals(subtask.getStatus(), newManager.getSubtask(subtask.getId()).getStatus());
+        assertEquals(subtask.getEpicId(), newManager.getSubtask(subtask.getId()).getEpicId());
+
+        // Удаляем тестовый файл после завершения теста
+        if (!testFile.delete()) {
             System.err.println("Ошибка при удалении файла: " + testFileName);
         }
-    }
-
-    private void deleteIfExists(String fileName) {
-        File file = new File(fileName);
-        if (file.exists()) {
-            file.delete();
-        }
-    }
-
-    private void checkEpic(Epic expected, Epic actual) {
-        assertNotNull(actual);
-        assertEquals(expected.getName(), actual.getName());
-        assertEquals(expected.getDescription(), actual.getDescription());
-        assertEquals(expected.getStatus(), actual.getStatus());
-    }
-
-    private void checkSubtask(Subtask expected, Subtask actual) {
-        assertNotNull(actual);
-        assertEquals(expected.getName(), actual.getName());
-        assertEquals(expected.getDescription(), actual.getDescription());
-        assertEquals(expected.getStatus(), actual.getStatus());
-        assertEquals(expected.getEpicId(), actual.getEpicId());
     }
 
     @Test

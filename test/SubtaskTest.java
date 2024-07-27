@@ -1,20 +1,18 @@
 import main.Status;
 import model.Subtask;
 import org.junit.jupiter.api.Test;
+import service.InMemoryTaskManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SubtaskTest {
     @Test
-    void shouldHaveSameId() {
-        Subtask subtask1 = new Subtask("Уборка в комнате", "Пылесосить и мыть пол", Status.IN_PROGRESS,
-                10);
-        Subtask subtask2 = new Subtask("Покупки", "Купить продукты", Status.NEW, 10);
+    public void shouldHaveSameId() {
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        // Здесь явно проверяем, что в taskManager нет задач
+        assertEquals(0, taskManager.getAllTasks().size());
 
-        subtask1.setId(8);
-        subtask2.setId(8);
-
-        assertEquals(subtask1.getId(), subtask2.getId());
+        int id = taskManager.createTask("Тестовое задание", "Описание задачи", Status.NEW);
+        assertEquals(0, id); // Проверяем, что ID равен 0
     }
-
 }

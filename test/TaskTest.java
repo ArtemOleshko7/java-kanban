@@ -1,22 +1,29 @@
 import main.Status;
 import model.Task;
+import service.InMemoryTaskManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public class TaskTest {
+    private InMemoryTaskManager taskManager;
 
-class TaskTest {
-
-
-    @Test
-    void shouldHaveSameId() {
-        Task task1 = new Task(null, "Получить почту", "Забрать письма", Status.NEW);
-        Task task2 = new Task(null, "Отправить открытку", "Поздравить друга", Status.IN_PROGRESS);
-
-        int commonId = 15;
-        task1.setId(commonId);
-        task2.setId(commonId);
-
-        assertEquals(task1.getId(), task2.getId()); // Проверка, что ID одинаковые
+    @BeforeEach
+    void setUp() {
+        taskManager = new InMemoryTaskManager(); // Инициализируем taskManager перед каждым тестом
     }
 
+    @Test
+    void shouldHaveUniqueIds() {
+        int id1 = taskManager.createTask("Task 1", "Description 1", Status.NEW);
+        int id2 = taskManager.createTask("Task 2", "Description 2", Status.NEW);
+
+        assertNotEquals(id1, id2, "ID задач должен быть уникальным"); // Проверяем, что ID разные
+    }
+
+    @Test
+    void shouldHaveFirstIdAsZero() {
+        int firstId = taskManager.createTask("Task 1", "Description 1", Status.NEW);
+        assertEquals(0, firstId, "Первый ID задачи должен быть 0"); // Проверка, что первый ID равен 0
+    }
 }
