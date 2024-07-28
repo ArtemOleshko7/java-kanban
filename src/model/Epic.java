@@ -1,58 +1,56 @@
 package model;
 
-import main.Status;
-import main.TaskType;
-import service.InMemoryTaskManager;
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.List;
 
 public class Epic extends Task {
-    private final ArrayList<Integer> subtaskIds = new ArrayList<>();
-    private final TaskType type = TaskType.EPIC_TASK;
+    private final List<Subtask> subTasks = new ArrayList<>();
 
-    public Epic(int id, InMemoryTaskManager taskManager, String name, String description, Status status) {
-        super(id, name, description, status); // Передайте id в конструктор родителя
+
+    public Epic(String nameTask, String descriptionTask) {
+        super(nameTask, descriptionTask, null);
     }
 
-    @Override
-    public TaskType getType() {
-        return type; // Возвращаем тип эпика
+    public Epic(String nameTask, String descriptionTask, TaskStatus status, int id) {
+        super(nameTask, descriptionTask, status, id);
     }
 
-    public ArrayList<Integer> getSubtaskIds() {
-        return subtaskIds;
+    public List<Subtask> getSubTasks() {
+        return subTasks;
     }
 
-    public void addSubtaskId(int id) {
-        if (id <= 0) {
-            throw new IllegalArgumentException("ID подзадачи должен быть больше нуля.");
+    public void changeSubTasks(List<Subtask> subTasks, Subtask subtask) {
+
+        subTasks.set(subTasks.indexOf(subtask), subtask);
+    }
+
+    public void addTask(Subtask subtask, Epic epic) {
+        epic.getSubTasks().add(subtask);
+    }
+
+    public void removeSubtask(Epic epic, Subtask subtask) {
+        epic.getSubTasks().remove(subtask);
+    }
+
+    public void calculateStatus(Epic epic) {
+        int sizeSubtask = epic.getSubTasks().size();
+        int numberOfStatusDone = 0;
+        int numberOfStatusProgress = 0;
+        TaskStatus result = TaskStatus.NEW;
+        for (Subtask element : epic.getSubTasks()) {
+            if (element.getStatus().equals(TaskStatus.DONE)) {
+                numberOfStatusDone += 1;
+            } else if (element.getStatus().equals(TaskStatus.IN_PROGRESS)) {
+                numberOfStatusProgress += 1;
+            }
         }
-        if (!subtaskIds.contains(id)) {
-            subtaskIds.add(id);
-        } else {
-            throw new IllegalArgumentException("Подзадача с таким ID уже добавлена.");
+        if (numberOfStatusDone == sizeSubtask) {
+            result = TaskStatus.DONE;
+        } else if (numberOfStatusProgress != 0 || numberOfStatusDone != 0) {
+            result = TaskStatus.IN_PROGRESS;
         }
+        epic.setStatus(result);
     }
 
-
-    @Override
-    public String toString() {
-        return String.format("Epic{id=%d, name='%s', description='%s', status=%s, subtaskIds=%s}",
-                getId(), getName(), getDescription(), getStatus(), subtaskIds);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Epic epic = (Epic) o;
-        return Objects.equals(subtaskIds, epic.subtaskIds);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskIds);
-    }
 
 }

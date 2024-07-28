@@ -1,59 +1,54 @@
 package service;
 
-import exception.ManagerSaveException;
-import main.Status;
 import model.Epic;
-import model.Subtask;
 import model.Task;
+import model.Subtask;
 
 import java.util.List;
 
+
 public interface TaskManager {
 
-    void addTask(Task task) throws ManagerSaveException;
 
-    int createTask(String name, String description, Status status) throws ManagerSaveException;
+    Task getTask(int id);
 
-    void updateTask(int id, Task task) throws ManagerSaveException;
+    Epic getEpic(int id);
 
-    Task getTask(int idCounter) throws ManagerSaveException;
+    Subtask getSubtask(int id);
 
-    List<Task> getAllTasks() throws ManagerSaveException;
+    Task createTask(Task task);
 
-    void deleteTask(int idCounter);
+    Epic createEpic(Epic epic);
 
-    void deleteAllTask();
+    Subtask createSubtask(Subtask subtask);
 
-    void addSubtask(Subtask subtask);
+    void updateTask(Task task);
 
-    int createSubtask(String name, String description, Status status, int epicId) throws ManagerSaveException;
+    void updateSubtask(Subtask subtask);
 
-    void updateSubtask(int id, Subtask subtask) throws ManagerSaveException;
+    void updateEpic(Epic epic);
 
-    Subtask getSubtask(int idCounter) throws ManagerSaveException;
+    List<Task> getAllTasks();
 
-    List<Subtask> getAllSubtasks();
+    List<Task> getAllEpic();
 
-    List<Subtask> getAllSubtasksInEpic(int epicId);
+    List<Task> getAllSubtasks();
 
-    void deleteSubtask(int idCounter);
+    void deleteTaskById(int id);
 
-    void deleteAllSubtasks();
+    void deleteSubtaskById(int id);
 
-    void addEpic(Epic epic);
+    void deleteEpicById(int id);
 
-    int createEpic(String name, String description, Status status) throws ManagerSaveException;
+    void deleteAllTasks();
 
-    void updateEpic(int id, Epic epic) throws ManagerSaveException;
+    void deleteAllSubtask();
 
-    Epic getEpic(int idCounter) throws ManagerSaveException;
+    void deleteAllEpic();
 
-    List<Epic> getAllEpics();
-
-    void deleteEpic(int idCounter);
-
-    void deleteAllEpics() throws ManagerSaveException;
+    List<Subtask> getSubtasksByEpic(Epic epic);
 
     List<Task> getHistory();
-}
 
+
+}

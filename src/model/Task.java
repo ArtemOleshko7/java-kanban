@@ -1,85 +1,84 @@
 package model;
 
-import main.Status;
-import main.TaskType;
-
 import java.util.Objects;
 
 public class Task {
-    protected Integer id;
-    protected String name;
-    protected String description;
-    protected Status status;
+    private int id;
+    private String nameTask;
+    private String descriptionTask;
+    protected TaskStatus status;
 
-    public Task(int id, String name, String description, Status status) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Имя не может быть пустым.");
-        }
-        if (description == null) {
-            throw new IllegalArgumentException("Описание не может быть null.");
-        }
-        if (status == null) {
-            throw new IllegalArgumentException("Статус не может быть null.");
-        }
 
-        this.id = id; // Устанавливаем переданный ID
-        this.name = name;
-        this.description = description;
+    public Task(String nameTask, String descriptionTask, TaskStatus status) {
+        this.nameTask = nameTask;
+        this.descriptionTask = descriptionTask;
         this.status = status;
     }
 
-    public Task(String name, String description, Status status) {
-        this(-1, name, description, status);
+    public Task(String nameTask, String descriptionTask, TaskStatus status, int id) {
+        this.nameTask = nameTask;
+        this.descriptionTask = descriptionTask;
+        this.status = status;
+        this.id = id;
     }
 
-    public TaskType getType() {
-        return TaskType.TASK;
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public String getNameTask() {
+        return nameTask;
+    }
+
+    public String getDescriptionTask() {
+        return descriptionTask;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        if (this.id != null) { // Используем null для проверки
-            throw new IllegalStateException("ID уже установлен и не может быть изменен.");
-        }
+    public void setId(int id) {
         this.id = id;
     }
 
-    public String getName() {
-        return name != null ? name : "";
+    public void setNameTask(String nameTask) {
+        this.nameTask = nameTask;
     }
 
-    public String getDescription() {
-        return description;
+    public void setDescriptionTask(String descriptionTask) {
+        this.descriptionTask = descriptionTask;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Task{id=%s, name='%s', description='%s', status=%s}",
-                id, name, description, status); // Изменено %d на %s, так как id может быть null
+    public Epic getEpic() {
+        return null;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
-        return id == task.id && Objects.equals(description, task.description) && Objects.equals(name, task.name)
-                && status == task.status;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (this.getClass() != obj.getClass()) return false;
+        Task task = (Task) obj;
+        return id == task.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(description, id, name, status);
+        return Objects.hash(id);
     }
+
+    @Override
+    public String toString() {
+        return "Task{" + "nameTask='" + nameTask + '\'' + ", descriptionTask='" +
+                descriptionTask + '\'' + ", status='" + status + '\'' +
+                ", id='" + id + '\'' + "}";
+
+    }
+
+
 }

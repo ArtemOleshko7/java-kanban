@@ -1,7 +1,6 @@
 package service;
 
 import model.Task;
-import main.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,75 +8,71 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private Node<Task> head;
-    private Node<Task> tail;
-    private Map<Integer, Node<Task>> historyMap = new HashMap<>();
+
+    private TasksDoubleList<Task> tasksDoubleList = new TasksDoubleList<>();
+    private Map<Integer, Node<Task>> nodeMap = new HashMap<>();
 
     @Override
     public void add(Task task) {
-        if (task == null) {
-            return; // Не добавляем null
+        if (nodeMap.containsKey(task.getId())) {
+            remove(task.getId());
         }
-        remove(task.getId());
-        linkLast(task);
-    }
-
-    @Override
-    public void remove(int id) {
-        if (historyMap.containsKey(id)) {
-            removeNode(historyMap.get(id));
-            historyMap.remove(id);
-        }
-    }
-
-    @Override
-    public void removeAll() {
-        historyMap.clear();
+        Task taskHistory = new Task(task.getNameTask(), task.getDescriptionTask(), task.getStatus(), task.getId());
+        tasksDoubleList.linkLast(taskHistory);
+        nodeMap.put(task.getId(), tasksDoubleList.tail);
     }
 
     @Override
     public List<Task> getHistory() {
-        return getTasks();
+        return tasksDoubleList.getTask();
     }
 
-    private void linkLast(Task task) {
-        Node<Task> newNode = new Node<>(tail, task, null); // Передаем текущий tail как prev, и null как next
-
-        if (tail == null) { // Если список пустой
-            head = newNode;
-        } else {
-            tail.setNext(newNode); // Связываем предыдущий tail с новым узлом
-        }
-        tail = newNode; // Обновляем tail на новый узел
-        historyMap.put(task.getId(), newNode); // Обновляем историю
+    @Override
+    public void remove(int id) {
+        tasksDoubleList.removeNode(nodeMap.get(id));
+        nodeMap.remove(id);
     }
 
-    public List<Task> getTasks() {
-        List<Task> listOfTasks = new ArrayList<>();
-        Node<Task> node = head;
-        while (node != null) {
-            listOfTasks.add(node.getTask());
-            node = node.getNext();
-        }
-        return listOfTasks;
-    }
+    public static class TasksDoubleList<T> {
+        public Node<T> head;
+        public Node<T> tail;
+        private int size = 0;
 
-    private void removeNode(Node<Task> node) {
-        Node<Task> prevNode = node.getPrev();
-        Node<Task> nextNode = node.getNext();
-        if (historyMap.size() == 1) {
-            head = null;
-            tail = null;
-        } else if (historyMap.size() > 1) {
-            if (prevNode == null) {
-                head = nextNode;
-                nextNode.setPrev(null);
-            } else if (nextNode == null) {
-                tail = prevNode;
-                prevNode.setNext(null);
+        public void linkLast(T task) {
+            final Node<T> oldTail = tail;
+            final Node<T> newNode = new Node<>(task, oldTail, null);
+            tail = newNode;
+            if (oldTail == null) {
+                head = newNode;
             } else {
-                prevNode.setNext(nextNode);
-                nextNode.setPrev(prevNode);
+                oldTail.next = newNode;
+            }
+            size++;
+        }
+
+        public List<T> getTask() {
+            List<T> history = new ArrayList<>();
+            Node<T> task = head;
+            for (int i = 1; i <= size; i++) {
+                history.add(task.data);
+                task = task.next;
+            }
+            return history;
+        }
+
+        public void removeNode(Node<T> taskNode) {
+            size--;
+            if (size == 0) {
+                tail = head = null;
+            } else if (taskNode.next == null) {
+                tail = taskNode.prev;
+                taskNode.prev.next = null;
+            } else if (taskNode.prev == null) {
+                head = taskNode.next;
+                taskNode.next.prev = null;
+            } else {
+                taskNode.next.prev = taskNode.prev;
+                taskNode.prev.next = taskNode.next;
             }
         }
     }

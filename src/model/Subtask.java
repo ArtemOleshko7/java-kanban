@@ -1,35 +1,24 @@
 package model;
 
-import main.Status;
-import main.TaskType;
-import service.InMemoryTaskManager;
-
 public class Subtask extends Task {
+    private Epic epic;
 
-    private final Integer epicId;
 
-    public Subtask(InMemoryTaskManager taskManager, String name, String description, Status status, Integer epicId) {
-        super(-1, name, description, status); // Используйте -1 как ID по умолчанию
-        this.epicId = epicId;
+    public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic) {
+        super(nameTask, descriptionTask, status);
+        this.epic = epic;
     }
 
-    public Subtask(Integer id, String name, String description, Status status, Integer epicId) {
-        super(id, name, description, status); // Передайте id
-        this.epicId = epicId;
+    public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic, int id) {
+        super(nameTask, descriptionTask, status, id);
+        this.epic = epic;
     }
 
-    @Override
-    public TaskType getType() {
-        return TaskType.SUB_TASK;
+    public void setEpicId(Epic epic) {
+        this.epic = epic;
     }
 
-    public Integer getEpicId() {
-        return epicId;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("SubTask{\nEpic Id=%d, Status=%s, Id=%d, Name='%s', Description='%s'}\n",
-                epicId, super.getStatus(), super.getId(), super.getName(), super.getDescription());
+    public Epic getEpic() {
+        return epic;
     }
 }

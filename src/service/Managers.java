@@ -2,7 +2,7 @@ package service;
 
 public class Managers {
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager(getDefaultHistory()); // Передаем HistoryManager в конструктор
+        return new InMemoryTaskManager();
     }
 
     public static HistoryManager getDefaultHistory() {
