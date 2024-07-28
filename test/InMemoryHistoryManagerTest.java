@@ -1,12 +1,15 @@
-import model.Task;
+import manager.HistoryManager;
+import manager.InMemoryHistoryManager;
 import model.TaskStatus;
 import org.junit.jupiter.api.Test;
-import service.HistoryManager;
-import service.InMemoryHistoryManager;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import model.Task;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryHistoryManagerTest {
     HistoryManager historyManager = new InMemoryHistoryManager();
@@ -21,7 +24,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldNotRetainOldTaskNameAfterUpdate() {
+    void shouldNotEqualsTaskInHistoryAfterChange() {
         Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
         historyManager.add(task);
         task.setNameTask("Убрать кухню");
@@ -31,7 +34,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldNotAllowDuplicatesInHistory() {
+    void shouldNotBeDuplicatesInHistory() {
 
         Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
         historyManager.add(task);
@@ -41,7 +44,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldRemoveOldDuplicatesAndAddToEndOfHistory() {
+    void shouldDuplicatesInHistoryBeRemovedOldValueAndAddToEndOfTheHistory() {
         Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
         Task task1 = new Task("Тренировка", "Пробежать 5 км", TaskStatus.NEW, 3);
         historyManager.add(task);

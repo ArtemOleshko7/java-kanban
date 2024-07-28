@@ -1,20 +1,22 @@
-import model.Epic;
-import model.Subtask;
-import model.Task;
+
+import manager.Managers;
+import manager.TaskManager;
 import model.TaskStatus;
 import org.junit.jupiter.api.Test;
-import service.Managers;
-import service.TaskManager;
+import model.Task;
+import model.Subtask;
+import model.Epic;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class InMemoryTaskManagerTest {
     TaskManager taskManager = Managers.getDefault();
-
     @Test
-    void shouldHaveDifferentIdAfterTaskCreation() {
+    void shouldBeChangedId() {
         Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 50);
         taskManager.createTask(task);
         Task task1 = taskManager.getTask(task.getId());
@@ -22,7 +24,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldMatchAllTaskAttributesAfterCreation() {
+    void shouldBeEqualsAllArgumentsTaskAfterAddInManager() {
         Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE);
         taskManager.createTask(task);
         Task task1 = taskManager.getTask(task.getId());
@@ -31,7 +33,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldSuccessfullyAddAndFetchTasksAndEpics() {
+    void addOtherTaskAndSearch() {
         Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE);
         taskManager.createTask(task);
         final List<Task> tasks = taskManager.getAllTasks();
@@ -50,7 +52,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldNotContainDeletedSubtaskIdInEpic() {
+    void shouldNotBeDeletetedSubtaskIdInEpic() {
         Epic epic = new Epic("Переезд", "Собрать все вещи");
         taskManager.createEpic(epic);
         Subtask subtask = new Subtask("Собрать вещи", "Разложить вещи по коробкам", TaskStatus.NEW, epic);
@@ -61,7 +63,7 @@ class InMemoryTaskManagerTest {
         taskManager.updateEpic(epic);
         List<Subtask> subtaskList = epic.getSubTasks();
         for (Subtask sub : subtaskList) {
-            assertNotEquals(sub.getId(), subtask1.getId(), "Эпик содержит не актуальный id подзадачи.");
+            assertNotEquals(sub.getId(), subtask1.getId(), "Эпик содержит не актуальный id подзачи.");
         }
     }
 

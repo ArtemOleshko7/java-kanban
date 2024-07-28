@@ -1,4 +1,4 @@
-package service;
+package manager;
 
 public class Node<T> {
     public T data;
@@ -11,5 +11,4 @@ public class Node<T> {
         this.prev = prev;
     }
 }
-
 

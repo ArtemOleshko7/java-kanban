@@ -1,15 +1,22 @@
-package service;
+package manager;
 
 import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.TaskStatus;
 
-import java.io.*;
+
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
-    private final File fileWithSavedTasks;
+    private File fileWithSavedTasks;
     private static final String COLUMN_DESIGNATIONS = "id,type,name,status,description,epic";
 
     public FileBackedTaskManager(File fileWithSavedTasks) {
@@ -42,13 +49,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     public String toString(Task task) {
         String stringTask;
         if (task.getClass().getSimpleName().equals("Task")) {
-            stringTask = String.format("%d,%s,%s,%s,%s", task.getId(), TaskType.TASK, task.getNameTask(),
+            stringTask = String.format("%d,%s,%s,%s,%s", task.getId(), TypeClass.TASK, task.getNameTask(),
                     task.getStatus(), task.getDescriptionTask());
         } else if (task.getClass().getSimpleName().equals("Subtask")) {
-            stringTask = String.format("%d,%s,%s,%s,%s,%d", task.getId(), TaskType.SUB_TASK, task.getNameTask(),
+            stringTask = String.format("%d,%s,%s,%s,%s,%d", task.getId(), TypeClass.SUBTASK, task.getNameTask(),
                     task.getStatus(), task.getDescriptionTask(), task.getEpic().getId());
         } else {
-            stringTask = String.format("%d,%s,%s,%s,%s", task.getId(), TaskType.EPIC_TASK, task.getNameTask(),
+            stringTask = String.format("%d,%s,%s,%s,%s", task.getId(), TypeClass.EPIC, task.getNameTask(),
                     task.getStatus(), task.getDescriptionTask());
         }
         return stringTask;
@@ -157,6 +164,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
         int id = 0;
+        //  try (BufferedReader fileReader = new BufferedReader(new FileReader(file.getName()))) {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file.getPath()))) {
             String line = fileReader.readLine();
             while (fileReader.ready()) {
@@ -182,5 +190,4 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         return fileBackedTaskManager;
     }
 }
-
 

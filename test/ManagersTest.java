@@ -1,13 +1,13 @@
+import manager.HistoryManager;
+import manager.Managers;
+import manager.TaskManager;
 import org.junit.jupiter.api.Test;
-import service.HistoryManager;
-import service.Managers;
-import service.TaskManager;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ManagersTest {
     @Test
-    void shouldReturnNonNullManagers() {
+    void shoudBeNotNull() {
         Managers managers = new Managers();
         TaskManager taskManager = managers.getDefault();
         HistoryManager historyManager = managers.getDefaultHistory();

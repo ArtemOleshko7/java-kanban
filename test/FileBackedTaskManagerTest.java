@@ -1,4 +1,4 @@
-import service.FileBackedTaskManager;
+import manager.FileBackedTaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -10,32 +10,43 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import static service.FileBackedTaskManager.loadFromFile;
+import static manager.FileBackedTaskManager.loadFromFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 class FileBackedTaskManagerTest {
     @Test
-    void shouldSaveAndLoadEmptyFileSuccessfully() {
+    void shouldBeSaveVoidFileAndDownloadVoidFile() {
         try {
+            // Создаем временный файл для тестирования
             File file = File.createTempFile("fileForTest", ".txt", new File(
-                    "C:\\Users\\I\\desktop\\java-kanban(NewTry)\\test\\resource"));
+                    "C:\\Users\\I\\Desktop\\java-kanban(NewTry)\\test\\resource"));
 
+            // Инициализируем FileBackedTaskManager для сохранения задач
             FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
+
+            // Загружаем задачи из файла
             FileBackedTaskManager fileBackedTaskManager1 = loadFromFile(file);
+
+            // Проверяем, что файл для сохранения задач соответствует созданному
             assertEquals(fileBackedTaskManager.getFileWithSavedTasks(), file, "Файл не сохранен");
+            // Убеждаемся, что файл пустой
             assertEquals(fileBackedTaskManager.getFileWithSavedTasks().length(), 0, "Файл не пустой");
+
+            // Проверяем, что файл был загружен корректно
             assertEquals(fileBackedTaskManager1.getFileWithSavedTasks(), file, "Файл не загружен");
+            // Снова убеждаемся, что загруженный файл пустой
             assertEquals(fileBackedTaskManager1.getFileWithSavedTasks().length(), 0, "Файл не пустой");
         } catch (IOException e) {
+            // Обрабатываем исключение, выводя стек вызовов
             e.printStackTrace();
         }
     }
 
     @Test
-    void shouldSaveAndLoadTasksSuccessfully() {
+    void shouldToSaveTasksAndDownloadTasks() {
         try {
-            File directory = new File("C:\\Users\\I\\desktop\\java-kanban(NewTry)\\test\\resource");
+            File directory = new File("C:\\Users\\I\\desktop\\java-kanban\\test\\resource");
             if (!directory.exists()) {
                 directory.mkdirs(); // Создание всех недостающих директорий
             }

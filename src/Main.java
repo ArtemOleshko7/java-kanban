@@ -1,14 +1,13 @@
+import manager.*;
 import model.Epic;
-import model.Subtask;
 import model.Task;
 import model.TaskStatus;
-import service.FileBackedTaskManager;
-import service.Managers;
-import service.TaskManager;
+import model.Subtask;
 
 import java.io.File;
 
-import static service.FileBackedTaskManager.loadFromFile;
+
+import static manager.FileBackedTaskManager.loadFromFile;
 
 
 public class Main {
@@ -70,9 +69,10 @@ public class Main {
         System.out.println("Размер " + inMemoryTaskManager.getHistory().size());
         task.setNameTask("NoRun");
         Task task12 = new Task("Studydf", "Studyingdf", TaskStatus.NEW);
-
+        // fileBackedTaskManagers1.createTask(task12);
         System.out.println(fileBackedTaskManagers1.getAllTasks());
         System.out.println(fileBackedTaskManagers1.getAllSubtasks());
+        //  System.out.println(inMemoryTaskManager.getSubtasksByEpic(epic));
 
 
         fileBackedTaskManagers.createTask(task);
