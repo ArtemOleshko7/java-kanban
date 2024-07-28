@@ -1,7 +1,7 @@
+import model.Epic;
 import model.Task;
 import model.TaskStatus;
 import org.junit.jupiter.api.Test;
-import model.Epic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
