@@ -39,7 +39,7 @@ class InMemoryTaskManagerTest {
         final List<Task> tasks = taskManager.getAllTasks();
         Epic epic = new Epic("Переезд", "Собрать все вещи");
         taskManager.createEpic(epic);
-        final List<Task> epics = taskManager.getAllEpic();
+        final List<Task> epics = taskManager.getAllEpics();
         Subtask subtask = new Subtask("Отдых", "Ничего не делать", TaskStatus.NEW, epic);
         taskManager.createSubtask(subtask);
         final List<Task> subtasks = taskManager.getAllSubtasks();

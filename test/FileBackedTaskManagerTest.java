@@ -46,7 +46,7 @@ class FileBackedTaskManagerTest {
     @Test
     void shouldToSaveTasksAndDownloadTasks() {
         try {
-            File directory = new File("C:\\Users\\I\\desktop\\java-kanban\\test\\resource");
+            File directory = new File("C:\\Users\\I\\desktop\\java-kanban(NewTry)\\test\\resource");
             if (!directory.exists()) {
                 directory.mkdirs(); // Создание всех недостающих директорий
             }

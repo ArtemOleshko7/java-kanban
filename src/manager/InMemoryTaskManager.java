@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.ArrayList;
 
 public class InMemoryTaskManager implements TaskManager {
-    private Map<Integer, Task> tasks;
-    private Map<Integer, Epic> epics;
-    private Map<Integer, Subtask> subtasks;
-    private HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+    protected Map<Integer, Task> tasks;
+    protected Map<Integer, Epic> epics;
+    protected Map<Integer, Subtask> subtasks;
+    protected HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
     private int id = 0;
 
     public InMemoryTaskManager() {
@@ -121,12 +121,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getAllTasks() {
-
         return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public List<Task> getAllEpic() {
+    public List<Task> getAllEpics() {
         return new ArrayList<>(epics.values());
     }
 

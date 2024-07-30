@@ -30,7 +30,7 @@ public interface TaskManager {
 
     List<Task> getAllTasks();
 
-    List<Task> getAllEpic();
+    List<Task> getAllEpics();
 
     List<Task> getAllSubtasks();
 

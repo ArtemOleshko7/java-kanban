@@ -40,7 +40,7 @@ public class Main {
         inMemoryTaskManager.createSubtask(subtask3);
 
         System.out.println("Список задач:" + inMemoryTaskManager.getAllTasks());
-        System.out.println("Список эпиков:" + inMemoryTaskManager.getAllEpic());
+        System.out.println("Список эпиков:" + inMemoryTaskManager.getAllEpics());
         System.out.println("Список подзадач:" + inMemoryTaskManager.getAllSubtasks());
         System.out.println("");
 
