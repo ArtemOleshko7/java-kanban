@@ -8,7 +8,7 @@ public class Epic extends Task {
 
 
     public Epic(String nameTask, String descriptionTask) {
-        super(nameTask, descriptionTask, null);
+        super(nameTask, descriptionTask, TaskStatus.NEW); // Устанавливаем начальный статус как TaskStatus.NEW
     }
 
     public Epic(String nameTask, String descriptionTask, TaskStatus status, int id) {
@@ -19,27 +19,33 @@ public class Epic extends Task {
         return subTasks;
     }
 
-    public void changeSubTasks(List<Subtask> subTasks, Subtask subtask) {
+    public void changeSubTask(Subtask subtask) {
+        List<Subtask> subTasks = this.getSubTasks(); // Получаем список подзадач
 
-        subTasks.set(subTasks.indexOf(subtask), subtask);
+        for (int i = 0; i < subTasks.size(); i++) {
+            if (subTasks.get(i).getId() == subtask.getId()) {
+                subTasks.set(i, subtask); // Заменяем подзадачу
+                return;
+            }
+        }
     }
 
-    public void addTask(Subtask subtask, Epic epic) {
-        epic.getSubTasks().add(subtask);
+    public void addSubtask(Subtask subtask) {
+        this.getSubTasks().add(subtask);
     }
 
-    public void removeSubtask(Epic epic, Subtask subtask) {
-        epic.getSubTasks().remove(subtask);
+    public void removeSubtask(Subtask subtask) {
+        this.getSubTasks().remove(subtask);
     }
 
-    public void calculateStatus(Epic epic) {
-        int sizeSubtask = epic.getSubTasks().size();
+    public void calculateStatus() {
+        int sizeSubtask = this.getSubTasks().size();
         int numberOfStatusDone = 0;
         int numberOfStatusProgress = 0;
 
-        for (Subtask element : epic.getSubTasks()) {
+        for (Subtask element : this.getSubTasks()) {
             if (element.getStatus().equals(TaskStatus.NEW)) {
-                epic.setStatus(TaskStatus.NEW);
+                this.setStatus(TaskStatus.NEW);
                 return; // Прекращаем исполнение, если есть подзадача со статусом NEW
             } else if (element.getStatus().equals(TaskStatus.DONE)) {
                 numberOfStatusDone++;
@@ -56,7 +62,7 @@ public class Epic extends Task {
             result = TaskStatus.IN_PROGRESS;
         }
 
-        epic.setStatus(result);
+        this.setStatus(result);
     }
 
 

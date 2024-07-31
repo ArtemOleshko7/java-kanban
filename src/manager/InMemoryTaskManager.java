@@ -86,8 +86,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask createSubtask(Subtask subtask) {
         Epic epic = epics.get(subtask.getEpic().getId());
-        epic.addTask(subtask, epic);
-        epic.calculateStatus(epic);
+        epic.addSubtask(subtask); // Изменили вызов на addSubtask
+        epic.calculateStatus(); // Изменили вызов на calculateStatus (без параметра)
         subtask.setId(generatedId());
         subtasks.put(subtask.getId(), subtask);
         return subtask;
@@ -106,8 +106,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (savedEpic == null) {
             return;
         }
-        savedEpic.changeSubTasks(epic.getSubTasks(), subtask);
-        savedEpic.calculateStatus(savedEpic);
+        // Обновляем подзадачу в списке подзадач эпика
+        savedEpic.getSubTasks().remove(subtask); // Сначала удаляем старую подзадачу
+        savedEpic.addSubtask(subtask); // Затем добавляем обновленную подзадачу
+        savedEpic.calculateStatus(); // Изменили вызов на calculateStatus (без параметра)
         epics.put(savedEpic.getId(), savedEpic);
         subtasks.put(subtask.getId(), subtask);
     }
@@ -154,11 +156,8 @@ public class InMemoryTaskManager implements TaskManager {
         Subtask removeSubtask = getSubtask(id);
         Epic epic = removeSubtask.getEpic();
         Epic epicSaved = epics.get(epic.getId());
-        epicSaved.removeSubtask(epicSaved, removeSubtask);
+        epicSaved.removeSubtask(removeSubtask); // Обновленный вызов метода
         subtasks.remove(id);
-        epicSaved.calculateStatus(epicSaved);
-        epics.put(epicSaved.getId(), epicSaved);
-
     }
 
     @Override
@@ -192,8 +191,8 @@ public class InMemoryTaskManager implements TaskManager {
         for (Subtask subtasks : subtasks.values()) {
             Epic epic = subtasks.getEpic();
             Epic epicSaved = epics.get(epic.getId());
-            epicSaved.removeSubtask(epicSaved, subtasks);
-            epicSaved.calculateStatus(epicSaved);
+            epicSaved.removeSubtask(subtasks); // Обновленный вызов метода
+            epicSaved.calculateStatus(); // Вызов для обновления статуса эпика
             epics.put(epicSaved.getId(), epicSaved);
             if (historyManager.getHistory().contains(subtasks)) {
                 historyManager.remove(subtasks.getId());

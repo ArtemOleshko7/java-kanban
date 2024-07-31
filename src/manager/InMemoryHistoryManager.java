@@ -29,11 +29,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        Node<Task> nodeToRemove = nodeMap.get(id);
-        if (nodeToRemove != null) {
-            tasksDoubleList.removeNode(nodeToRemove);
-            nodeMap.remove(id);
-        }
+        tasksDoubleList.removeNode(nodeMap.remove(id));
     }
 
     public static class TasksDoubleList<T> {
@@ -55,12 +51,12 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         public List<T> getTask() {
             List<T> history = new ArrayList<>();
-            Node<T> task = head;
-            while (task != null) {
-                history.add(task.data);
-                task = task.next;
+            Node<T> task = head; // Начинаем с головы списка
+            while (task != null) { // Пока есть узлы
+                history.add(task.data); // Добавляем данные в историю
+                task = task.next; // Переходим к следующему узлу
             }
-            return history;
+            return history; // Возвращаем собранный список
         }
 
         public void removeNode(Node<T> taskNode) {
