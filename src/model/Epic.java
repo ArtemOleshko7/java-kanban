@@ -36,19 +36,26 @@ public class Epic extends Task {
         int sizeSubtask = epic.getSubTasks().size();
         int numberOfStatusDone = 0;
         int numberOfStatusProgress = 0;
-        TaskStatus result = TaskStatus.NEW;
+
         for (Subtask element : epic.getSubTasks()) {
-            if (element.getStatus().equals(TaskStatus.DONE)) {
-                numberOfStatusDone += 1;
+            if (element.getStatus().equals(TaskStatus.NEW)) {
+                epic.setStatus(TaskStatus.NEW);
+                return; // Прекращаем исполнение, если есть подзадача со статусом NEW
+            } else if (element.getStatus().equals(TaskStatus.DONE)) {
+                numberOfStatusDone++;
             } else if (element.getStatus().equals(TaskStatus.IN_PROGRESS)) {
-                numberOfStatusProgress += 1;
+                numberOfStatusProgress++;
             }
         }
+
+        TaskStatus result = TaskStatus.NEW; // По умолчанию
+
         if (numberOfStatusDone == sizeSubtask) {
             result = TaskStatus.DONE;
-        } else if (numberOfStatusProgress != 0 || numberOfStatusDone != 0) {
+        } else if (numberOfStatusProgress > 0 || numberOfStatusDone > 0) {
             result = TaskStatus.IN_PROGRESS;
         }
+
         epic.setStatus(result);
     }
 

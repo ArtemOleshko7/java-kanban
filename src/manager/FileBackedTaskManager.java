@@ -5,14 +5,7 @@ import model.Subtask;
 import model.Task;
 import model.TaskStatus;
 
-
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.Map;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
@@ -44,6 +37,34 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         } catch (IOException e) {
             throw new ManagerSaveException();
         }
+    }
+
+    public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
+        int id = 0;
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(file.getPath()))) {
+            String line = fileReader.readLine();
+            while (fileReader.ready()) {
+                line = fileReader.readLine();
+                if (fileBackedTaskManager.fromStringTask(line).getId() > id) {
+                    id = fileBackedTaskManager.fromStringTask(line).getId();
+                }
+                if (fileBackedTaskManager.getNameClass(line).equals("Task")) {
+                    fileBackedTaskManager.getTasks().put(fileBackedTaskManager.fromStringTask(line).getId(),
+                            fileBackedTaskManager.fromStringTask(line));
+                } else if (fileBackedTaskManager.getNameClass(line).equals("Subtask")) {
+                    fileBackedTaskManager.getSubtasks().put(fileBackedTaskManager.fromStringSubtask(line).getId(),
+                            fileBackedTaskManager.fromStringSubtask(line));
+                } else {
+                    fileBackedTaskManager.getEpics().put(fileBackedTaskManager.fromStringEpic(line).getId(),
+                            fileBackedTaskManager.fromStringEpic(line));
+                }
+            }
+        } catch (IOException e) {
+            throw new ManagerSaveException();
+        }
+        fileBackedTaskManager.setIdCounter(id);
+        return fileBackedTaskManager;
     }
 
     public String toString(Task task) {
@@ -161,32 +182,5 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         save();
     }
 
-    public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
-        int id = 0;
-        //  try (BufferedReader fileReader = new BufferedReader(new FileReader(file.getName()))) {
-        try (BufferedReader fileReader = new BufferedReader(new FileReader(file.getPath()))) {
-            String line = fileReader.readLine();
-            while (fileReader.ready()) {
-                line = fileReader.readLine();
-                if (fileBackedTaskManager.fromStringTask(line).getId() > id) {
-                    id = fileBackedTaskManager.fromStringTask(line).getId();
-                }
-                if (fileBackedTaskManager.getNameClass(line).equals("Task")) {
-                    fileBackedTaskManager.getTasks().put(fileBackedTaskManager.fromStringTask(line).getId(),
-                            fileBackedTaskManager.fromStringTask(line));
-                } else if (fileBackedTaskManager.getNameClass(line).equals("Subtask")) {
-                    fileBackedTaskManager.getSubtasks().put(fileBackedTaskManager.fromStringSubtask(line).getId(),
-                            fileBackedTaskManager.fromStringSubtask(line));
-                } else {
-                    fileBackedTaskManager.getEpics().put(fileBackedTaskManager.fromStringEpic(line).getId(),
-                            fileBackedTaskManager.fromStringEpic(line));
-                }
-            }
-        } catch (IOException e) {
-            throw new ManagerSaveException();
-        }
-        fileBackedTaskManager.setIdCounter(id);
-        return fileBackedTaskManager;
-    }
+
 }
