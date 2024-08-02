@@ -1,13 +1,13 @@
 package manager;
 
 import model.Epic;
-import model.Task;
 import model.Subtask;
+import model.Task;
 
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     protected Map<Integer, Task> tasks;
@@ -28,18 +28,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     public void setIdCounter(int count) {
         id = count;
-    }
-
-    public Map<Integer, Task> getTasks() {
-        return tasks;
-    }
-
-    public Map<Integer, Subtask> getSubtasks() {
-        return subtasks;
-    }
-
-    public Map<Integer, Epic> getEpics() {
-        return epics;
     }
 
     public int getIdCounter() {

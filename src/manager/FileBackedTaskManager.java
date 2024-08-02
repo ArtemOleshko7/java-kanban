@@ -7,6 +7,7 @@ import model.Task;
 import model.TaskStatus;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
@@ -24,15 +25,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     private void save() throws ManagerSaveException {
         try (Writer fileWriter = new FileWriter(fileWithSavedTasks.getPath())) {
             fileWriter.write(COLUMN_DESIGNATIONS);
-            for (Map.Entry<Integer, Task> entry : getTasks().entrySet()) {
-                fileWriter.write("\n" + toString(entry.getValue()));
+
+            // Обработка всех задач, включая эпики и сабтаски
+            for (Task task : getAllTasks()) {
+                fileWriter.write("\n" + toString(task));
             }
 
-            for (Map.Entry<Integer, Epic> entry : getEpics().entrySet()) {
-                fileWriter.write("\n" + toString(entry.getValue()));
+            for (Task task : getAllEpics()) {
+                fileWriter.write("\n" + toString(task));
             }
-            for (Map.Entry<Integer, Subtask> entry : getSubtasks().entrySet()) {
-                fileWriter.write("\n" + toString(entry.getValue()));
+
+            for (Task task : getAllSubtasks()) {
+                fileWriter.write("\n" + toString(task));
             }
 
         } catch (IOException e) {
@@ -40,30 +44,35 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         }
     }
 
+
     public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
         int id = 0;
+
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file.getPath()))) {
-            String line = fileReader.readLine();
-            while (fileReader.ready()) {
-                line = fileReader.readLine();
-                if (fileBackedTaskManager.fromStringTask(line).getId() > id) {
-                    id = fileBackedTaskManager.fromStringTask(line).getId();
-                }
+            String line;
+            // Пропустим заголовок
+            fileReader.readLine();
+
+            while ((line = fileReader.readLine()) != null) {
                 if (fileBackedTaskManager.getNameClass(line).equals("Task")) {
-                    fileBackedTaskManager.getTasks().put(fileBackedTaskManager.fromStringTask(line).getId(),
-                            fileBackedTaskManager.fromStringTask(line));
+                    Task task = fileBackedTaskManager.fromStringTask(line);
+                    fileBackedTaskManager.tasks.put(task.getId(), task);
+                    id = Math.max(id, task.getId());
                 } else if (fileBackedTaskManager.getNameClass(line).equals("Subtask")) {
-                    fileBackedTaskManager.getSubtasks().put(fileBackedTaskManager.fromStringSubtask(line).getId(),
-                            fileBackedTaskManager.fromStringSubtask(line));
-                } else {
-                    fileBackedTaskManager.getEpics().put(fileBackedTaskManager.fromStringEpic(line).getId(),
-                            fileBackedTaskManager.fromStringEpic(line));
+                    Subtask subtask = fileBackedTaskManager.fromStringSubtask(line);
+                    fileBackedTaskManager.subtasks.put(subtask.getId(), subtask);
+                    id = Math.max(id, subtask.getId());
+                } else if (fileBackedTaskManager.getNameClass(line).equals("Epic")) {
+                    Epic epic = fileBackedTaskManager.fromStringEpic(line);
+                    fileBackedTaskManager.epics.put(epic.getId(), epic);
+                    id = Math.max(id, epic.getId());
                 }
             }
         } catch (IOException e) {
             throw new ManagerSaveException();
         }
+
         fileBackedTaskManager.setIdCounter(id);
         return fileBackedTaskManager;
     }
@@ -124,7 +133,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     public Epic getEpicWithoutAddInHistory(int id) {
-        return getEpics().get(id);
+        List<Task> epicList = getAllEpics();
+        // Проверьте, что индекс в пределах допустимого диапазона
+        if (id >= 0 && id < epicList.size()) {
+            return (Epic) epicList.get(id); // Приведение типа, если это безопасно
+        }
+        return null; // Или выбросьте исключение, если эпик не найден
     }
 
     @Override
