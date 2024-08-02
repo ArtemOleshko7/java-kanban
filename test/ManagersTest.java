@@ -1,16 +1,17 @@
-import main.HistoryManager;
-import main.Managers;
-import main.TaskManager;
+import manager.HistoryManager;
+import manager.Managers;
+import manager.TaskManager;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ManagersTest {
     @Test
-    void shoudBeNotNull() {
-        Managers managers = new Managers();
-        TaskManager taskManager = managers.getDefault();
-        HistoryManager historyManager = managers.getDefaultHistory();
+    void shouldBeNotNull() {
+        // Прямо вызываем статические методы без создания экземпляра
+        TaskManager taskManager = Managers.getDefault();
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
         assertNotNull(historyManager);
         assertNotNull(taskManager);
     }

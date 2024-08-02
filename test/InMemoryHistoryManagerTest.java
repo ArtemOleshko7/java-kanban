@@ -1,36 +1,57 @@
-import main.HistoryManager;
-import main.Managers;
-import main.Status;
-import main.Task;
+import manager.HistoryManager;
+import manager.InMemoryHistoryManager;
+import model.TaskStatus;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import model.Task;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class InMemoryHistoryManagerTest {
-    Managers managers = new Managers();
-    HistoryManager historyManager = managers.getDefaultHistory();
+class InMemoryHistoryManagerTest {
+    HistoryManager historyManager = new InMemoryHistoryManager();
 
     @Test
     void add() {
-        Task task = new Task("Уборка", "Помыть посуду", Status.DONE, 5);
+        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
         historyManager.add(task);
-        final List<Task> history = historyManager.getAll();
-        assertNotNull(history, "История не пустая.");
-        assertEquals(1, history.size(), "История не пустая.");
+        final List<Task> history = historyManager.getHistory();
+        assertNotNull(history, "История пустая.");
+        assertEquals(1, history.size(), "Размер истории неверен.");
     }
 
     @Test
     void shouldNotEqualsTaskInHistoryAfterChange() {
-        Task task1 = new Task("Уборка", "Помыть посуду", Status.DONE, 5);
-        Task task2 = new Task(task1); // Создаем копию task1
+        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
+        historyManager.add(task);
+        task.setNameTask("Убрать кухню");
+        historyManager.add(task);
+        final List<Task> history = historyManager.getHistory();
+        assertNotEquals(history.get(0).getNameTask(), "Уборка", "Не сохранялись предыдущие данные");
+    }
+
+    @Test
+    void shouldNotBeDuplicatesInHistory() {
+
+        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
+        historyManager.add(task);
+        historyManager.add(task);
+        final List<Task> history = historyManager.getHistory();
+        assertEquals(1, history.size(), "В истории есть дубликат.");
+    }
+
+    @Test
+    void shouldDuplicatesInHistoryBeRemovedOldValueAndAddToEndOfTheHistory() {
+        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
+        Task task1 = new Task("Тренировка", "Пробежать 5 км", TaskStatus.NEW, 3);
+        historyManager.add(task);
         historyManager.add(task1);
-
-        task2.setName("Убрать кухню");
-        historyManager.add(task2);
-
-        final List<Task> history = historyManager.getAll();
-        assertNotEquals(history.get(0).getName(), history.get(1).getName(), "Не сохранялись предыдущие данные");
+        historyManager.add(task);
+        final List<Task> history = historyManager.getHistory();
+        assertEquals(2, history.size(), "Дубликат не удалился.");
+        assertEquals("Уборка", history.get(history.size() - 1).getNameTask(), "Дубликат не добавлен в конец списка.");
     }
 }

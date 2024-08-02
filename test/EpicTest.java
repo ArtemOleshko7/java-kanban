@@ -1,20 +1,16 @@
-import main.*;
+import model.Epic;
+import model.Task;
+import model.TaskStatus;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class EpicTest {
+class EpicTest {
     @Test
-    void shouldHaveSameId() {
-        Epic epic = new Epic("Уборка", "Помыть посуду", Status.DONE);
-        Task epic1 = new Epic("Готовка", "Приготвоить обед", Status.NEW);
-
-        epic.setId(5);
-        epic1.setId(5);
-
-        assertEquals(epic.getId(), epic1.getId());
+    void shouldBeEqualsEpicWithSameId() {
+        Epic epic = new Epic("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
+        Task epic1 = new Epic("Готовка", "Приготвоить обед", TaskStatus.NEW, 5);
+        assertEquals(epic, epic1);
     }
 
 
