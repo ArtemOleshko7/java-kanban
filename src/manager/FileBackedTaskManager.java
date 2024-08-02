@@ -1,5 +1,6 @@
 package manager;
 
+import exception.ManagerSaveException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -101,24 +102,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     public String getNameClass(String str) {
-        String nameClass;
         String[] infoAboutTask = str.split(",");
-        nameClass = switch (infoAboutTask[1]) {
-            case "TASK" -> "Task";
-            case "SUBTASK" -> "Subtask";
-            default -> "Epic";
-        };
-        return nameClass;
+        try {
+            TypeClass taskType = TypeClass.valueOf(infoAboutTask[1].toUpperCase()); // Приведение к верхнему регистру
+            return switch (taskType) {
+                case TASK -> "Task";
+                case SUBTASK -> "Subtask";
+                case EPIC -> "Epic";
+            };
+        } catch (IllegalArgumentException e) {
+            return "Unknown"; // Возвращение "Unknown" для неизвестных типов
+        }
     }
 
     public TaskStatus getTaskStatus(String status) {
-        TaskStatus taskStatus;
-        taskStatus = switch (status) {
-            case "NEW" -> TaskStatus.NEW;
-            case "DONE" -> TaskStatus.DONE;
-            default -> TaskStatus.IN_PROGRESS;
-        };
-        return taskStatus;
+        try {
+            return TaskStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            return TaskStatus.IN_PROGRESS; // Если статус неизвестен, возвращаем статус по умолчанию
+        }
     }
 
     public Epic getEpicWithoutAddInHistory(int id) {

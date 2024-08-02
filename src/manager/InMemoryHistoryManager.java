@@ -60,18 +60,33 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         public void removeNode(Node<T> taskNode) {
+            if (taskNode == null) {
+                throw new IllegalArgumentException("taskNode cannot be null");
+            }
+
+            Node<T> prevNode = taskNode.prev;
+            Node<T> nextNode = taskNode.next;
+
             size--;
             if (size == 0) {
                 head = tail = null;
             } else if (taskNode == tail) {
-                tail = taskNode.prev;
-                tail.next = null;
+                tail = prevNode;
+                if (tail != null) {
+                    tail.next = null; // Проверка на null, чтобы избежать NPE
+                }
             } else if (taskNode == head) {
-                head = taskNode.next;
-                head.prev = null;
+                head = nextNode;
+                if (head != null) {
+                    head.prev = null; // Проверка на null, чтобы избежать NPE
+                }
             } else {
-                taskNode.prev.next = taskNode.next;
-                taskNode.next.prev = taskNode.prev;
+                if (prevNode != null) {
+                    prevNode.next = nextNode;
+                }
+                if (nextNode != null) {
+                    nextNode.prev = prevNode;
+                }
             }
         }
     }
