@@ -1,10 +1,13 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
     private List<Subtask> subTasks = new ArrayList<>();
+    private LocalDateTime endTime;
 
 
     public Epic(String nameTask, String descriptionTask) {
@@ -13,6 +16,22 @@ public class Epic extends Task {
 
     public Epic(String nameTask, String descriptionTask, TaskStatus status, int id) {
         super(nameTask, descriptionTask, status, id);
+    }
+
+    public Epic(String nameTask, String descriptionTask, LocalDateTime endTime) {
+        super(nameTask, descriptionTask, TaskStatus.NEW); // Устанавливаем начальный статус как TaskStatus.NEW
+        this.endTime = endTime; // Инициализируем endTime
+    }
+
+    public Epic(String nameTask, String descriptionTask, TaskStatus status, int id, LocalDateTime endTime) {
+        super(nameTask, descriptionTask, status, id);
+        this.endTime = endTime; // Инициализируем endTime
+    }
+
+    public Epic(String nameTask, String descriptionTask, TaskStatus status, int id, Duration duration, LocalDateTime startTime) {
+        super(nameTask, descriptionTask, status, id);
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
     public List<Subtask> getSubTasks() {
@@ -31,7 +50,8 @@ public class Epic extends Task {
     }
 
     public void addSubtask(Subtask subtask) {
-        this.getSubTasks().add(subtask);
+        this.subTasks.add(subtask);
+        calculateStatus(); // Обновляем статус после добавления
     }
 
     public void removeSubtask(Subtask subtask) {
@@ -63,6 +83,14 @@ public class Epic extends Task {
         }
 
         this.setStatus(result);
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
 

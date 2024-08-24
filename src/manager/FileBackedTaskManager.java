@@ -7,11 +7,13 @@ import model.Task;
 import model.TaskStatus;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
     private File fileWithSavedTasks;
-    private static final String COLUMN_DESIGNATIONS = "id,type,name,status,description,epic";
+    private static final String COLUMN_DESIGNATIONS = "id,type,name,status,description,epic,startTime,duration";
 
     public FileBackedTaskManager(File fileWithSavedTasks) {
         this.fileWithSavedTasks = fileWithSavedTasks;
@@ -54,15 +56,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
             fileReader.readLine();
 
             while ((line = fileReader.readLine()) != null) {
-                if (fileBackedTaskManager.getNameClass(line).equals("Task")) {
+                String taskType = fileBackedTaskManager.getNameClass(line);
+                if (taskType.equals("Task")) {
                     Task task = fileBackedTaskManager.fromStringTask(line);
                     fileBackedTaskManager.tasks.put(task.getId(), task);
                     id = Math.max(id, task.getId());
-                } else if (fileBackedTaskManager.getNameClass(line).equals("Subtask")) {
+                } else if (taskType.equals("Subtask")) {
                     Subtask subtask = fileBackedTaskManager.fromStringSubtask(line);
                     fileBackedTaskManager.subtasks.put(subtask.getId(), subtask);
                     id = Math.max(id, subtask.getId());
-                } else if (fileBackedTaskManager.getNameClass(line).equals("Epic")) {
+                } else if (taskType.equals("Epic")) {
                     Epic epic = fileBackedTaskManager.fromStringEpic(line);
                     fileBackedTaskManager.epics.put(epic.getId(), epic);
                     id = Math.max(id, epic.getId());
@@ -70,6 +73,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
             }
         } catch (IOException e) {
             throw new ManagerSaveException();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // Обработка исключения для неправильного формата строки
+            throw new ManagerSaveException("Некорректный формат данных в файле.");
         }
 
         fileBackedTaskManager.setIdCounter(id);
@@ -79,14 +85,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     public String toString(Task task) {
         String stringTask;
         if (task.getClass().getSimpleName().equals("Task")) {
-            stringTask = String.format("%d,%s,%s,%s,%s", task.getId(), TypeClass.TASK, task.getNameTask(),
-                    task.getStatus(), task.getDescriptionTask());
+            stringTask = String.format("%d,%s,%s,%s,%s,%s,%s", task.getId(), TypeClass.TASK, task.getNameTask(),
+                    task.getStatus(), task.getDescriptionTask(), task.getStartTime(), task.getDuration());
         } else if (task.getClass().getSimpleName().equals("Subtask")) {
-            stringTask = String.format("%d,%s,%s,%s,%s,%d", task.getId(), TypeClass.SUBTASK, task.getNameTask(),
-                    task.getStatus(), task.getDescriptionTask(), task.getEpic().getId());
+            stringTask = String.format("%d,%s,%s,%s,%s,%d,%s,%s", task.getId(), TypeClass.SUBTASK, task.getNameTask(),
+                    task.getStatus(), task.getDescriptionTask(), task.getEpic().getId(), task.getStartTime(), task.getDuration());
         } else {
-            stringTask = String.format("%d,%s,%s,%s,%s", task.getId(), TypeClass.EPIC, task.getNameTask(),
-                    task.getStatus(), task.getDescriptionTask());
+            stringTask = String.format("%d,%s,%s,%s,%s,%s,%s", task.getId(), TypeClass.EPIC, task.getNameTask(),
+                    task.getStatus(), task.getDescriptionTask(), task.getStartTime(), task.getDuration());
         }
         return stringTask;
     }
@@ -94,19 +100,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     public Task fromStringTask(String value) {
         String[] infoAboutTask = value.split(",");
         return new Task(infoAboutTask[2], infoAboutTask[4], getTaskStatus(infoAboutTask[3]),
-                Integer.parseInt(infoAboutTask[0]));
+                Integer.parseInt(infoAboutTask[0]), // Парсинг startTime
+                LocalDateTime.parse(infoAboutTask[5]),      // Парсинг duration
+                Duration.parse(infoAboutTask[6]));   // Парсинг id
     }
 
     public Subtask fromStringSubtask(String value) {
         String[] infoAboutTask = value.split(",");
         return new Subtask(infoAboutTask[2], infoAboutTask[4], getTaskStatus(infoAboutTask[3]),
-                getEpicWithoutAddInHistory(Integer.parseInt(infoAboutTask[5])), Integer.parseInt(infoAboutTask[0]));
+                        getEpicWithoutAddInHistory(Integer.parseInt(infoAboutTask[5])),
+                Integer.parseInt(infoAboutTask[0]), // Парсинг startTime
+                LocalDateTime.parse(infoAboutTask[6]),      // Парсинг duration
+                Duration.parse(infoAboutTask[7]));   // Парсинг id
     }
 
     public Epic fromStringEpic(String value) {
         String[] infoAboutTask = value.split(",");
         return new Epic(infoAboutTask[2], infoAboutTask[4], getTaskStatus(infoAboutTask[3]),
-                Integer.parseInt(infoAboutTask[0]));
+                Integer.parseInt(infoAboutTask[0]), // Парсинг startTime
+                        Duration.parse(infoAboutTask[6]),      // Парсинг duration
+                LocalDateTime.parse(infoAboutTask[5]));   // Парсинг id
     }
 
     public String getNameClass(String str) {
@@ -133,7 +146,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
 
     public Epic getEpicWithoutAddInHistory(int id) {
         List<Task> epicList = getAllEpics();
-        // Проверьте, что индекс в пределах допустимого диапазона
+        // Проверяем, что индекс в пределах допустимого диапазона
         if (id >= 0 && id < epicList.size()) {
             return (Epic) epicList.get(id); // Приведение типа, если это безопасно
         }
@@ -141,24 +154,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     @Override
-    public Task createTask(Task task) {
+    public void createTask(Task task) {
         super.createTask(task);
         save();
-        return task;
     }
 
     @Override
-    public Epic createEpic(Epic epic) {
+    public void createEpic(Epic epic) {
         super.createEpic(epic);
         save();
-        return epic;
     }
 
     @Override
-    public Subtask createSubtask(Subtask subtask) {
+    public void createSubtask(Subtask subtask) {
         super.createSubtask(subtask);
         save();
-        return subtask;
     }
 
     @Override

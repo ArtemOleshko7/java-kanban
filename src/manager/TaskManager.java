@@ -16,11 +16,11 @@ public interface TaskManager {
 
     Subtask getSubtask(int id);
 
-    Task createTask(Task task);
+    void createTask(Task task);
 
-    Epic createEpic(Epic epic);
+    void createEpic(Epic epic);
 
-    Subtask createSubtask(Subtask subtask);
+    void createSubtask(Subtask subtask);
 
     void updateTask(Task task);
 
@@ -49,6 +49,8 @@ public interface TaskManager {
     List<Subtask> getSubtasksByEpic(Epic epic);
 
     List<Task> getHistory();
+
+    boolean isTimeOverlap(Task task);
 
 
 }

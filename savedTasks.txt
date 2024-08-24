@@ -1,4 +1,5 @@
-id,type,name,status,description,epic
+id,type,name,status,description,duration,start time,epic
+
 1,TASK,NoRun,DONE,running
 2,TASK,Chek,NEW,Chek work
 3,EPIC,Move,NEW,Move
