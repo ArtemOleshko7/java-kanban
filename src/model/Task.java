@@ -107,12 +107,7 @@ public class Task {
         if (this == o) return true;
         if (!(o instanceof Task)) return false;
         Task task = (Task) o;
-        return id == task.id &&
-                Objects.equals(nameTask, task.nameTask) &&
-                Objects.equals(descriptionTask, task.descriptionTask) &&
-                status == task.status &&
-                Objects.equals(startTime, task.startTime) &&
-                Objects.equals(duration, task.duration);
+        return id == task.id; // Сравнение только по ID
     }
 
     @Override

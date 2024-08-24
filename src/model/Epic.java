@@ -93,5 +93,18 @@ public class Epic extends Task {
         this.endTime = endTime;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Epic)) return false;
+        Epic epic = (Epic) o;
+        return getId() == epic.getId(); // Сравниваем по ID
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(getId());
+    }
+
 
 }
