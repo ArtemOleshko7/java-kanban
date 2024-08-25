@@ -42,10 +42,6 @@ public class InMemoryTaskManager implements TaskManager {
         id = count;
     }
 
-    public int getIdCounter() {
-        return id;
-    }
-
     private <T extends Task> T getTaskById(Map<Integer, T> map, int id) {
         T task = map.get(id);
         if (task != null) {
@@ -71,6 +67,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void createTask(Task task) {
+        // Проверка, что задача не null
+        if (task == null) {
+            throw new IllegalArgumentException("Task cannot be null");
+        }
+
         // Проверка на пересечение времени
         if (isTimeOverlap(task)) {
             throw new IllegalArgumentException("Task time overlaps with an existing task");
@@ -78,12 +79,17 @@ public class InMemoryTaskManager implements TaskManager {
 
         // Генерация уникального идентификатора
         int newId = generatedId();
+
+        // Проверка на уникальность идентификатора
+        if (tasks.containsKey(newId)) {
+            throw new IllegalStateException("Generated ID already exists");
+        }
+
         task.setId(newId);
 
         // Добавление задачи в коллекции
         tasks.put(task.getId(), task);
         prioritizedTasks.add(task);
-
     }
 
     @Override
@@ -120,22 +126,37 @@ public class InMemoryTaskManager implements TaskManager {
 
         // Генерация уникального идентификатора
         int newId = generatedId();
+
+        // Проверка на уникальность идентификатора
+        if (epics.containsKey(newId)) {
+            throw new IllegalStateException("Generated ID already exists");
+        }
+
         epic.setId(newId);
 
         // Добавление эпика в коллекцию
         epics.put(epic.getId(), epic);
-
     }
 
     @Override
     public void updateTask(Task task) {
-        final Task savedTask = tasks.get(task.getId());
-        if (savedTask == null) {
-            return;
+        // Проверка, что задача не null
+        if (task == null) {
+            throw new IllegalArgumentException("Task cannot be null");
         }
+
+        // Проверка, существует ли задача
+        Task savedTask = tasks.get(task.getId());
+        if (savedTask == null) {
+            throw new IllegalArgumentException("Task with the given ID does not exist");
+        }
+
+        // Проверка на пересечение времени
         if (isTimeOverlap(task)) {
             throw new IllegalArgumentException("Task time overlaps with an existing task");
         }
+
+        // Обновление задачи
         tasks.put(task.getId(), task);
         prioritizedTasks.remove(savedTask);
         prioritizedTasks.add(task);
@@ -143,9 +164,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        final Subtask savedSubtask = subtasks.get(subtask.getId());
+        // Проверка, что подзадача не null
+        if (subtask == null) {
+            throw new IllegalArgumentException("Subtask cannot be null");
+        }
+
+        // Проверка, существует ли подзадача
+        Subtask savedSubtask = subtasks.get(subtask.getId());
         if (savedSubtask == null) {
-            return; // Подзадача не найдена, выходим
+            throw new IllegalArgumentException("Subtask with the given ID does not exist");
         }
 
         // Проверка на пересечение времени
@@ -153,17 +180,16 @@ public class InMemoryTaskManager implements TaskManager {
             throw new IllegalArgumentException("Subtask time overlaps with an existing task");
         }
 
-        // Обновляем подзадачу в списке подзадач эпика
+        // Получение эпика и проверка его существования
         Epic epic = savedSubtask.getEpic();
-        Epic savedEpic = epics.get(epic.getId());
-        if (savedEpic == null) {
+        if (epic == null || !epics.containsKey(epic.getId())) {
             throw new IllegalArgumentException("Epic not found for the given subtask");
         }
 
         // Удаляем старую подзадачу и добавляем обновленную
-        savedEpic.getSubTasks().remove(savedSubtask);
-        savedEpic.addSubtask(subtask);
-        savedEpic.calculateStatus(); // Обновляем статус эпика
+        epic.getSubTasks().remove(savedSubtask);
+        epic.addSubtask(subtask);
+        epic.calculateStatus(); // Обновляем статус эпика
 
         // Сохраняем обновленные данные
         subtasks.put(subtask.getId(), subtask);
@@ -171,16 +197,22 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateEpic(Epic epic) {
-        final Epic savedEpic = epics.get(epic.getId());
+        // Проверка, что эпик не null
+        if (epic == null) {
+            throw new IllegalArgumentException("Epic cannot be null");
+        }
+
+        // Проверка, существует ли эпик
+        Epic savedEpic = epics.get(epic.getId());
         if (savedEpic == null) {
-            return; // Эпик не найден, выходим
+            throw new IllegalArgumentException("Epic with the given ID does not exist");
         }
 
         // Обновляем данные эпика
         savedEpic.setNameTask(epic.getNameTask());
         savedEpic.setDescriptionTask(epic.getDescriptionTask());
 
-        // Пересчитываем статус эпика, если необходимо
+        // Пересчитываем статус эпика
         savedEpic.calculateStatus();
 
         // Сохраняем обновленные данные

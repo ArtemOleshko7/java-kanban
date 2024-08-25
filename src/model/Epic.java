@@ -38,20 +38,14 @@ public class Epic extends Task {
         return subTasks;
     }
 
-    public void changeSubTask(Subtask subtask) {
-        List<Subtask> subTasks = this.getSubTasks(); // Получаем список подзадач
-
-        for (int i = 0; i < subTasks.size(); i++) {
-            if (subTasks.get(i).getId() == subtask.getId()) {
-                subTasks.set(i, subtask); // Заменяем подзадачу
-                return;
-            }
-        }
-    }
 
     public void addSubtask(Subtask subtask) {
-        this.subTasks.add(subtask);
-        calculateStatus(); // Обновляем статус после добавления
+        if (!subTasks.contains(subtask)) { // Проверка на уникальность
+            this.subTasks.add(subtask);
+            calculateStatus(); // Обновляем статус после добавления
+        } else {
+            throw new IllegalArgumentException("Subtask already exists in the epic");
+        }
     }
 
     public void removeSubtask(Subtask subtask) {
@@ -59,30 +53,41 @@ public class Epic extends Task {
     }
 
     public void calculateStatus() {
-        int sizeSubtask = this.getSubTasks().size();
-        int numberOfStatusDone = 0;
-        int numberOfStatusProgress = 0;
+        if (subTasks.isEmpty()) {
+            setStatus(TaskStatus.NEW);
+            return;
+        }
 
-        for (Subtask element : this.getSubTasks()) {
-            if (element.getStatus().equals(TaskStatus.NEW)) {
-                this.setStatus(TaskStatus.NEW);
-                return; // Прекращаем исполнение, если есть подзадача со статусом NEW
-            } else if (element.getStatus().equals(TaskStatus.DONE)) {
-                numberOfStatusDone++;
-            } else if (element.getStatus().equals(TaskStatus.IN_PROGRESS)) {
-                numberOfStatusProgress++;
+        boolean hasNew = false;
+        boolean hasDone = false;
+        boolean hasInProgress = false;
+
+        for (Subtask subtask : subTasks) {
+            switch (subtask.getStatus()) {
+                case NEW:
+                    hasNew = true;
+                    break;
+                case DONE:
+                    hasDone = true;
+                    break;
+                case IN_PROGRESS:
+                    hasInProgress = true;
+                    break;
+                // Другие статусы могут быть обработаны, если необходимо
             }
         }
 
-        TaskStatus result = TaskStatus.NEW; // По умолчанию
-
-        if (numberOfStatusDone == sizeSubtask) {
-            result = TaskStatus.DONE;
-        } else if (numberOfStatusProgress > 0 || numberOfStatusDone > 0) {
-            result = TaskStatus.IN_PROGRESS;
+        if (hasDone && hasNew) {
+            setStatus(TaskStatus.IN_PROGRESS);
+        } else if (hasInProgress) {
+            setStatus(TaskStatus.IN_PROGRESS);
+        } else if (hasDone) {
+            setStatus(TaskStatus.DONE);
+        } else if (hasNew) {
+            setStatus(TaskStatus.NEW);
+        } else {
+            setStatus(TaskStatus.NEW); // Статус по умолчанию, если все подзадачи отсутствуют
         }
-
-        this.setStatus(result);
     }
 
     public LocalDateTime getEndTime() {
