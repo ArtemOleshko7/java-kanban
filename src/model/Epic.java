@@ -4,9 +4,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Epic extends Task {
-    private List<Subtask> subTasks = new ArrayList<>();
+    private List<Subtask> subtaskOfEpicIDs = new ArrayList<>();
     private LocalDateTime endTime;
 
 
@@ -34,26 +35,48 @@ public class Epic extends Task {
         this.startTime = startTime;
     }
 
-    public List<Subtask> getSubTasks() {
-        return subTasks;
+    public List<Integer> getSubtaskOfEpicIDs() {
+        return subtaskOfEpicIDs.stream()
+                .map(Subtask::getId)
+                .collect(Collectors.toList());
     }
 
 
     public void addSubtask(Subtask subtask) {
-        if (!subTasks.contains(subtask)) { // Проверка на уникальность
-            this.subTasks.add(subtask);
-            calculateStatus(); // Обновляем статус после добавления
-        } else {
-            throw new IllegalArgumentException("Subtask already exists in the epic");
+        // Проверка на null
+        if (subtask == null) {
+            throw new IllegalArgumentException("Subtask cannot be null");
         }
+
+        // Добавление подзадачи и обновление статуса
+        this.subtaskOfEpicIDs.add(subtask);
+        calculateStatus(); // Обновляем статус после добавления
     }
 
     public void removeSubtask(Subtask subtask) {
-        this.getSubTasks().remove(subtask);
+        // Удаляем ID подзадачи из списка подзадач эпика
+        if (subtaskOfEpicIDs.remove(subtask)) {
+            // Если подзадача была успешно удалена, обновляем статус после удаления
+            calculateStatus();
+            updateEndTime(); // Необходимо обновить endTime
+        } else {
+            throw new IllegalArgumentException("Subtask not found in epic");
+        }
+    }
+
+    private void updateEndTime() {
+        if (subtaskOfEpicIDs.isEmpty()) {
+            endTime = null; // Если подзадач нет, endTime также будет null
+        } else {
+            endTime = subtaskOfEpicIDs.stream()
+                    .map(Subtask::getEndTime) // Предполагается, что Subtask имеет метод getEndTime()
+                    .max(LocalDateTime::compareTo)
+                    .orElse(null);
+        }
     }
 
     public void calculateStatus() {
-        if (subTasks.isEmpty()) {
+        if (subtaskOfEpicIDs.isEmpty()) {
             setStatus(TaskStatus.NEW);
             return;
         }
@@ -62,7 +85,7 @@ public class Epic extends Task {
         boolean hasDone = false;
         boolean hasInProgress = false;
 
-        for (Subtask subtask : subTasks) {
+        for (Subtask subtask : subtaskOfEpicIDs) {
             switch (subtask.getStatus()) {
                 case NEW:
                     hasNew = true;
@@ -109,6 +132,18 @@ public class Epic extends Task {
     @Override
     public int hashCode() {
         return Integer.hashCode(getId());
+    }
+
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "id=" + getId() +
+                ", name='" + getNameTask() + '\'' +
+                ", description='" + getDescriptionTask() + '\'' +
+                ", status=" + getStatus() +
+                ", endTime=" + endTime +
+                ", subTasks=" + subtaskOfEpicIDs +
+                '}';
     }
 
 

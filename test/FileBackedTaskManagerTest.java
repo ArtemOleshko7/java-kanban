@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
 
 import static manager.FileBackedTaskManager.loadFromFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,16 +49,22 @@ class FileBackedTaskManagerTest {
         try {
             File directory = new File("C:\\Users\\I\\desktop\\java-kanban(NewTry)\\test\\resource");
             if (!directory.exists()) {
-                directory.mkdirs(); // Создание всех недостающих директорий
+                directory.mkdirs();
             }
             File file1 = File.createTempFile("fileForTest", ".txt", directory);
             FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file1);
+
             Task task = new Task("run", "running", TaskStatus.NEW);
             fileBackedTaskManager.createTask(task);
+
             Epic epic = new Epic("Move", "Move");
-            Subtask subtask = new Subtask("House", "Buy new house", TaskStatus.NEW, epic);
+
+            Duration duration = Duration.ofHours(1); // Пример значения для duration
+            Subtask subtask = new Subtask("House", "Buy new house", TaskStatus.NEW, epic, duration);
+
             fileBackedTaskManager.createEpic(epic);
             fileBackedTaskManager.createSubtask(subtask);
+
             BufferedReader fileReader = new BufferedReader(new FileReader(file1.getPath()));
             String line = fileReader.readLine();
             while (fileReader.ready()) {
@@ -67,13 +74,14 @@ class FileBackedTaskManagerTest {
                             "Задача не сохранилась в файл");
                 } else if (fileBackedTaskManager.getNameClass(line).equals("Subtask")) {
                     assertEquals(subtask, fileBackedTaskManager.fromStringSubtask(line),
-                            "Задача не сохранилась в файл");
+                            "Подзадача не сохранилась в файл");
                 } else {
                     assertEquals(epic, fileBackedTaskManager.fromStringEpic(line),
-                            "Задача не сохранилась в файл");
+                            "Эпопея не сохранилась в файл");
                 }
             }
             fileReader.close();
+
             FileBackedTaskManager fileBackedTaskManager1 = loadFromFile(file1);
             assertEquals(task, fileBackedTaskManager1.getTask(1), "Задачи не загрузились");
             assertEquals(epic, fileBackedTaskManager1.getEpic(2), "Задачи не загрузились");

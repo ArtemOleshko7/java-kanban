@@ -8,9 +8,13 @@ public class Subtask extends Task {
     private Epic epic;
 
 
-    public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic) {
+    public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic, Duration duration) {
         super(nameTask, descriptionTask, status);
         this.epic = epic;
+        if (duration == null) {
+            throw new IllegalArgumentException("Subtask duration cannot be null");
+        }
+        this.duration = duration;
     }
 
     public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic, int id) {
@@ -18,10 +22,12 @@ public class Subtask extends Task {
         this.epic = epic;
     }
 
-    // Конструктор с полным набором параметров
     public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic, int id, LocalDateTime startTime, Duration duration) {
         super(nameTask, descriptionTask, status, id, startTime, duration);
         this.epic = epic;
+        if (duration == null) {
+            throw new IllegalArgumentException("Subtask duration cannot be null");
+        }
     }
 
     public void setEpic(Epic epic) {
@@ -35,8 +41,10 @@ public class Subtask extends Task {
     @Override
     public String toString() {
         return "Subtask{" +
-                "epic=" + epic +
-                ", " + super.toString() +
+                "name='" + getNameTask() + '\'' +
+                ", description='" + getDescriptionTask() + '\'' +
+                ", status=" + getStatus() +
+                ", epicId=" + (epic != null ? epic.getId() : null) +
                 '}';
     }
 

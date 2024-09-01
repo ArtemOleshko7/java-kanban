@@ -1,6 +1,7 @@
-id,type,name,status,description,duration,start time,epic
-
-1,TASK,NoRun,DONE,running
-2,TASK,Chek,NEW,Chek work
-3,EPIC,Move,NEW,Move
-4,SUBTASK,read,NEW,reading,3
+id,type,name,status,description,epic,startTime,duration
+10,EPIC,Move,DONE,Move,null,PT1H
+11,SUBTASK,read,DONE,reading,10,null,PT1H
+8,TASK,NoRun,DONE,running,null,null
+9,TASK,Chek,NEW,Chek work,null,null
+10,EPIC,Move,DONE,Move,null,PT1H
+11,SUBTASK,read,DONE,reading,10,null,PT1H

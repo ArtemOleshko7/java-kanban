@@ -48,9 +48,8 @@ public interface TaskManager {
 
     List<Subtask> getSubtasksByEpic(Epic epic);
 
-    List<Task> getHistory();
-
     boolean isTimeOverlap(Task task);
 
-
+    //Удаление задач
+    void removeAll();
 }

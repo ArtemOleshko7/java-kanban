@@ -7,6 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EpicTest {
@@ -23,9 +25,10 @@ class EpicTest {
         epic = new Epic("Epic", "Description of epic");
         manager.createEpic(epic);
 
-        subtask1 = new Subtask("Subtask 1", "Description of subtask1", TaskStatus.IN_PROGRESS, epic);
-        subtask2 = new Subtask("Subtask 2", "Description of subtask2", TaskStatus.IN_PROGRESS, epic);
-        subtask3 = new Subtask("Subtask 3", "Description of subtask3", TaskStatus.NEW, epic); // пример, где одна подзадача NEW
+        Duration duration = Duration.ofHours(1); // Устанавливаем примерное значение для duration
+        subtask1 = new Subtask("Subtask 1", "Description of subtask1", TaskStatus.IN_PROGRESS, epic, duration);
+        subtask2 = new Subtask("Subtask 2", "Description of subtask2", TaskStatus.IN_PROGRESS, epic, duration);
+        subtask3 = new Subtask("Subtask 3", "Description of subtask3", TaskStatus.NEW, epic, duration); // Пример, где одна подзадача NEW
 
         manager.createSubtask(subtask1);
         manager.createSubtask(subtask2);

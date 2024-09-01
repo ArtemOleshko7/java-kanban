@@ -112,7 +112,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(nameTask, descriptionTask, status, id, startTime, duration);
+        return Objects.hash(id); // Хэш-код только по ID
     }
 
     @Override
