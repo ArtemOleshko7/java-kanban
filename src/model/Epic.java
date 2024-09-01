@@ -28,10 +28,6 @@ public class Epic extends Task {
         return subtaskOfEpicIDs;
     }
 
-    public void setSubtaskOfEpicIDs(List<Integer> subtaskOfEpicIDs) {
-        this.subtaskOfEpicIDs = subtaskOfEpicIDs;
-    }
-
     public LocalDateTime getEndTime() {
         return endTime;
     }

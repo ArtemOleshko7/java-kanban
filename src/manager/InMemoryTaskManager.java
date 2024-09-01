@@ -47,7 +47,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void addTask(Task task) {
         if (isTimeOverlap(task)) {
-            throw new IllegalArgumentException("Task time overlaps with an existing task");
+            throw new IllegalArgumentException("Время задачи пересекается с существующей задачей.");
         }
 
         while (task.getId() == 0) {
@@ -80,7 +80,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void addSubtask(Subtask subtask) {
         if (isTimeOverlap(subtask)) {
-            throw new IllegalArgumentException("Subtask time overlaps with an existing task");
+            throw new IllegalArgumentException("Время подзадачи пересекается с существующей задачей.");
         }
 
         while (subtask.getId() == 0) {
@@ -110,7 +110,8 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         if (isTimeOverlap(task)) {
-            throw new IllegalArgumentException("Task time overlaps with an existing task");
+            throw new IllegalArgumentException("Время задачи пересекается с существующей задачей."
+            );
         }
         tasks.put(task.getId(), task);
         prioritizedTasks.remove(savedTask);
@@ -137,7 +138,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         if (isTimeOverlap(subtask)) {
-            throw new IllegalArgumentException("Task time overlaps with an existing task");
+            throw new IllegalArgumentException("Время задачи пересекается с другой существующей задачей.");
         }
         subtasks.put(subtask.getId(), subtask);
         updateEpicStatus(subtask.getEpicId());

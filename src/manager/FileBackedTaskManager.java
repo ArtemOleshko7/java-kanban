@@ -90,7 +90,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
         } catch (IOException | IllegalArgumentException e) {
-            throw new ManagerSaveException("Error saving tasks", e);
+            throw new ManagerSaveException("Ошибка при сохранении задач.", e);
         }
     }
 
@@ -131,7 +131,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     });
 
         } catch (IOException | IllegalArgumentException e) {
-            throw new ManagerSaveException("Error loading tasks", e);
+            throw new ManagerSaveException("Ошибка при загрузке задач.", e);
         }
         return manager;
     }
@@ -164,7 +164,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 subtask.setStartTime(startTime);
                 return subtask;
             default:
-                throw new IllegalArgumentException("Unknown task type: " + type);
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
         }
     }
 }
