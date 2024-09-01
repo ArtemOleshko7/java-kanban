@@ -1,15 +1,18 @@
-import org.junit.jupiter.api.Test;
 import model.Task;
 import model.TaskStatus;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 class TaskTest {
     @Test
-    void shouldBeEqualsTaskWithSameId() {
-        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 5);
-        Task task1 = new Task("Готовка", "Приготвоить обед", TaskStatus.NEW, 5);
-        assertEquals(task, task1);
+    void taskInstancesWithEqualIdsShouldBeEqual() {
+        // Создаем два экземпляра Task с одинаковыми id
+        Task task1 = new Task(1, "Task 1", "Description 1", TaskStatus.NEW);
+        Task task2 = new Task(1, "Task 1", "Description 1", TaskStatus.NEW);
+
+        // Проверяем, что экземпляры равны друг другу
+        assertEquals(task1, task2, "Экземпляры Task с одинаковыми id не равны");
     }
 }

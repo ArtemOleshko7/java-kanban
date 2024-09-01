@@ -1,81 +1,194 @@
-
+import manager.InMemoryTaskManager;
 import manager.Managers;
 import manager.TaskManager;
-import model.TaskStatus;
-import org.junit.jupiter.api.Test;
-import model.Task;
-import model.Subtask;
 import model.Epic;
+import model.Subtask;
+import model.Task;
+import model.TaskStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-import java.util.List;
+import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryTaskManagerTest {
-    TaskManager taskManager = Managers.getDefault();
-    @Test
-    void shouldBeChangedId() {
-        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE, 50);
-        taskManager.createTask(task);
-        Task task1 = taskManager.getTask(task.getId());
-        assertNotEquals(50, task1.getId());
+class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+    private TaskManager manager;
+
+    @BeforeEach
+    void SetUp() throws IOException {
+        super.setUp();
+        manager = Managers.getDefault();
+        manager.addTask(task);
+        manager.addEpic(epic);
+        manager.addSubtask(subtask);
     }
 
     @Test
-    void shouldBeEqualsAllArgumentsTaskAfterAddInManager() {
-        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE);
-        taskManager.createTask(task);
-        Task task1 = taskManager.getTask(task.getId());
-        assertEquals("Уборка", task1.getNameTask());
-        assertEquals("Помыть посуду", task1.getDescriptionTask());
+    void canAddAndFindTaskById() {
+        Task foundTask = manager.getTaskById(task.getId());
+        assertNotNull(foundTask, "Задача не найдена");
+        assertEquals(task, foundTask, "Найденная задача не соответствует ожидаемой");
     }
 
     @Test
-    void addOtherTaskAndSearch() {
-        Task task = new Task("Уборка", "Помыть посуду", TaskStatus.DONE);
-        taskManager.createTask(task);
-        final List<Task> tasks = taskManager.getAllTasks();
-
-        Epic epic = new Epic("Переезд", "Собрать все вещи");
-        taskManager.createEpic(epic);
-        final List<Task> epics = taskManager.getAllEpics();
-
-        Duration duration = Duration.ofHours(2); // Пример значения для duration
-        Subtask subtask = new Subtask("Отдых", "Ничего не делать", TaskStatus.NEW, epic, duration);
-        taskManager.createSubtask(subtask);
-
-        final List<Task> subtasks = taskManager.getAllSubtasks();
-        assertNotNull(subtasks, "История не пустая.");
-        assertNotNull(epics, "История не пустая.");
-        assertNotNull(tasks, "История не пустая.");
-        assertEquals(task, taskManager.getTask(task.getId()));
-        assertEquals(epic, taskManager.getEpic(epic.getId()));
-        assertEquals(subtask, taskManager.getSubtask(subtask.getId()));
+    void canAddAndFindEpicById() {
+        Epic foundEpic = manager.getEpicById(epic.getId());
+        assertNotNull(foundEpic, "Эпик не найден");
+        assertEquals(epic, foundEpic, "Найденный эпик не соответствует ожидаемому");
     }
 
     @Test
-    void shouldNotContainDeletedSubtaskIdInEpic() {
-        Epic epic = new Epic("Переезд", "Собрать все вещи");
-        taskManager.createEpic(epic);
+    void canAddAndFindSubtaskById() {
+        Subtask foundSubtask = manager.getSubtaskById(subtask.getId());
+        assertNotNull(foundSubtask, "Подзадача не найдена");
+        assertEquals(subtask, foundSubtask, "Найденная подзадача не соответствует ожидаемой");
+    }
 
-        Duration duration = Duration.ofHours(1);
-        Subtask subtask = new Subtask("Собрать вещи", "Разложить вещи по коробкам", TaskStatus.NEW, epic, duration);
-        taskManager.createSubtask(subtask);
+    @Test
+    void canAddAndFindTasksWithGeneratedIds() {
+        Task taskWithoutID = new Task("Task Without ID", "Description", TaskStatus.IN_PROGRESS);
+        manager.addTask(taskWithoutID);
 
-        Subtask subtask1 = new Subtask("Убрать квартиру", "Убрать", TaskStatus.NEW, epic, duration);
-        taskManager.createSubtask(subtask1);
+        Task foundTaskWithoutID = manager.getTaskById(taskWithoutID.getId());
 
-        taskManager.deleteSubtaskById(subtask1.getId());
-        taskManager.updateEpic(epic);
+        assertNotNull(foundTaskWithoutID, "Задача со сгенерированным id не была найдена");
+        assertEquals(taskWithoutID, foundTaskWithoutID, "Найденная задача со сгенерированным id не соответствует ожидаемой");
+    }
 
-        List<Subtask> subtasksAfterDeletion = taskManager.getSubtasksByEpic(epic); // Получаем актуальные подзадачи
-        for (Subtask sub : subtasksAfterDeletion) {
-            assertNotEquals(sub.getId(), subtask1.getId(), "Эпик содержит не актуальный id подзадачи.");
+    @Test
+    public void testUpdateTask() {
+        task.setStatus(TaskStatus.DONE);
+        task.setName("Updated Task");
+        task.setDescription("Updated description");
+
+        manager.updateTask(task);
+
+        Task updatedTask = manager.getTaskById(task.getId());
+
+        assertEquals(TaskStatus.DONE, updatedTask.getStatus());
+        assertEquals("Updated Task", updatedTask.getName());
+        assertEquals("Updated description", updatedTask.getDescription());
+    }
+
+    @Test
+    public void testUpdateEpic() {
+        epic.setName("Updated Epic");
+        epic.setDescription("Updated description");
+
+        manager.updateEpic(epic);
+
+        Task updatedEpic = manager.getEpicById(epic.getId());
+
+        assertEquals("Updated Epic", updatedEpic.getName());
+        assertEquals("Updated description", updatedEpic.getDescription());
+    }
+
+    @Test
+    public void testUpdateSubtask() {
+        subtask.setStatus(TaskStatus.DONE);
+        subtask.setName("Updated Subtask");
+        subtask.setDescription("Updated description");
+
+        manager.updateTask(task);
+
+        Task updatedSubtask = manager.getSubtaskById(subtask.getId());
+
+        assertEquals(TaskStatus.DONE, updatedSubtask.getStatus());
+        assertEquals("Updated Subtask", updatedSubtask.getName());
+        assertEquals("Updated description", updatedSubtask.getDescription());
+    }
+
+    @Test
+    public void when30MinutesBetweenTasks_TasksShouldNotOverlap() { //Промежуток между временем выполнения задач - 30 минут
+        task.setStartTime(2024, 8, 6, 9, 0);
+        task.setDuration(30);
+        subtask.setStartTime(2024, 8, 6, 10, 0);
+        subtask.setDuration(30);
+
+        manager.updateTask(task);
+        manager.updateTask(subtask);
+
+        assertFalse(manager.isTimeOverlap(task));
+        assertFalse(manager.isTimeOverlap(subtask));
+    }
+
+    @Test
+    public void when0MinutesBetweenTasks_TasksShouldNotOverlap() { //Промежуток между временем выполнения задач - 0 минут
+        task.setStartTime(2024, 8, 6, 9, 0);
+        task.setDuration(60);
+        subtask.setStartTime(2024, 8, 6, 10, 0);
+        subtask.setDuration(30);
+
+        manager.updateTask(task);
+        manager.updateTask(subtask);
+
+        assertFalse(manager.isTimeOverlap(subtask));
+    }
+
+    @Test
+    public void testOverlap() {
+        task.setStartTime(2024, 8, 6, 9, 0); // Накладка времени выполнения задач - 10 минут
+        task.setDuration(70);
+        subtask.setStartTime(2024, 8, 6, 10, 0);
+        subtask.setDuration(30);
+
+        try {
+            manager.updateTask(task);
+            manager.updateTask(subtask);
+            fail("Expected IllegalArgumentException to be thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Task time overlaps with an existing task", e.getMessage());
         }
     }
 
+    @Test
+    public void whenNoStartTimeAndDuration_TasksShouldNotOverlap() {
+        task.setStartTime(null);
+        subtask.setStartTime(null);
 
+        manager.updateTask(task);
+        manager.updateTask(subtask);
+
+        assertFalse(manager.isTimeOverlap(subtask));
+    }
+
+    @Test
+    public void whenNoStartTime_ThereAreDurations_TasksShouldNotOverlap() {
+        task.setStartTime(null);
+        subtask.setStartTime(null);
+
+        task.setDuration(20);
+        subtask.setDuration(20);
+
+        manager.updateTask(task);
+        manager.updateTask(subtask);
+
+        assertFalse(manager.isTimeOverlap(subtask));
+    }
+
+    @Test
+    public void whenSubtaskRemoved_thenAlsoRemovedFromEpic() {
+        manager.removeSubtask(subtask.getId());
+        assertTrue(manager.getSubtasksOfEpic(epic.getId()).isEmpty());
+    }
+
+    @Test
+    void subtasksShouldNotContainOldIdsAfterDeletion() {
+        manager.removeSubtask(subtask.getId()); // Удаление подзадачи
+        Epic updatedEpic = manager.getEpicById(epic.getId()); // Получение обновленного эпика
+        assertFalse(updatedEpic.getSubtaskOfEpicIDs().contains(subtask.getId()), "Deleted subtask ID should not be in the epic");
+    }
+
+    @Test
+    public void testSubtaskHasEpic() {
+        Subtask tempSubtask = manager.getSubtaskById(subtask.getId());
+        assertEquals(epic.getId(), tempSubtask.getEpicId());
+
+        Epic tempEpic = manager.getEpicById(epic.getId());
+        assertTrue(manager.getSubtasksOfEpic(tempEpic.getId()).contains(subtask));
+        assertTrue(tempEpic.getSubtaskOfEpicIDs().contains(subtask.getId()));
+    }
 }
+
+

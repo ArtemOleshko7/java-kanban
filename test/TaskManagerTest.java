@@ -1,9 +1,9 @@
 import manager.TaskManager;
-import org.junit.jupiter.api.BeforeEach;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.TaskStatus;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +18,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @BeforeEach
     void setUp() throws IOException {
         file = new File("data.csv");
-        task = new Task("Sample Task", "Description", TaskStatus.NEW, 1);
-        epic = new Epic("Epic", "Epic Description", TaskStatus.IN_PROGRESS, 2);
-        subtask = new Subtask("Subtask", "Subtask Description", TaskStatus.DONE, epic, 3);
+        task = new Task(1, "Sample Task", "Description", TaskStatus.NEW);
+        epic = new Epic(2, "Epic", "Epic Description", TaskStatus.IN_PROGRESS);
+        subtask = new Subtask(epic.getId(), 3, "Subtask", "Subtask Description", TaskStatus.DONE);
     }
 }

@@ -1,13 +1,15 @@
 package manager;
 
 public class Managers {
-    // Приватный конструктор
     private Managers() {
-        // Запретить создание экземпляров этого класса
     }
 
     public static TaskManager getDefault() {
         return new InMemoryTaskManager();
+    }
+
+    public static TaskManager getDefault(HistoryManager historyManager) {
+        return new InMemoryTaskManager(historyManager);
     }
 
     public static HistoryManager getDefaultHistory() {

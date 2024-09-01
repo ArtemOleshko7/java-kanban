@@ -7,8 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EpicTest {
@@ -22,51 +20,47 @@ class EpicTest {
     @BeforeEach
     void createEpicAndSubtasks() {
         manager = new InMemoryTaskManager();
-        epic = new Epic("Epic", "Description of epic");
-        manager.createEpic(epic);
-
-        Duration duration = Duration.ofHours(1); // Устанавливаем примерное значение для duration
-        subtask1 = new Subtask("Subtask 1", "Description of subtask1", TaskStatus.IN_PROGRESS, epic, duration);
-        subtask2 = new Subtask("Subtask 2", "Description of subtask2", TaskStatus.IN_PROGRESS, epic, duration);
-        subtask3 = new Subtask("Subtask 3", "Description of subtask3", TaskStatus.NEW, epic, duration); // Пример, где одна подзадача NEW
-
-        manager.createSubtask(subtask1);
-        manager.createSubtask(subtask2);
-        manager.createSubtask(subtask3);
-
-        epic.calculateStatus(); // Вызов метода для пересчета статуса эпика
+        epic = new Epic("Epic", "Description of epic", TaskStatus.NEW);
+        manager.addEpic(epic);
+        int epicId = epic.getId();
+        subtask1 = new Subtask(epicId, "Subtask 1", "Description of subtask1", TaskStatus.NEW);
+        subtask2 = new Subtask(epicId, "Subtask 2", "Description of subtask2", TaskStatus.NEW);
+        subtask3 = new Subtask(epicId, "Subtask 3", "Description of subtask3", TaskStatus.NEW);
+        manager.addSubtask(subtask1);
+        manager.addSubtask(subtask2);
+        manager.addSubtask(subtask3);
     }
 
     @AfterEach
     void removeEpicAndSubtasks() {
-        manager.deleteAllEpic();
+        manager.removeAllEpics();
     }
 
     @Test
     void shouldReturnNewEpicStatusWithoutSubtasks() {
-        manager.deleteAllSubtask();
+        manager.removeAllSubtasks();
         assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус пустого эпика не NEW");
     }
 
     @Test
     void epicCannotBeAddedAsSubtaskToItself() {
-        manager.createTask(epic);
+        manager.addTask(epic);
+    }
+
+    @Test
+    void shouldReturnNewEpicStatusWithAllSubtasksNewStatus() {
+        manager.updateEpicStatus(epic.getId());
+        assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус эпика c новыми сабтасками не NEW");
     }
 
     @Test
     void shouldReturnProgressEpicStatusWithSubtasksProgressStatus() {
-        // Установим статус подзадач
         subtask1.setStatus(TaskStatus.IN_PROGRESS);
         subtask2.setStatus(TaskStatus.IN_PROGRESS);
 
-        // Обновим подзадачи в менеджере
         manager.updateSubtask(subtask1);
         manager.updateSubtask(subtask2);
 
-        // Вызовем метод расчета статуса эпика
-        epic.calculateStatus();
-
-        // Проверим, что статус эпика установлен правильно
         assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "Статус эпика с сабтасками со статусом IN_PROGRESS не IN_PROGRESS");
     }
 

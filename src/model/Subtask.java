@@ -1,65 +1,69 @@
 package model;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
-    private Epic epic;
+    private int epicId;
 
-
-    public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic, Duration duration) {
-        super(nameTask, descriptionTask, status);
-        this.epic = epic;
-        if (duration == null) {
-            throw new IllegalArgumentException("Subtask duration cannot be null");
-        }
-        this.duration = duration;
+    //Конструктор без id, duration и startTime
+    public Subtask(int epicId, String name, String description, TaskStatus status) {
+        super(name, description, status);
+        this.epicId = epicId;
     }
 
-    public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic, int id) {
-        super(nameTask, descriptionTask, status, id);
-        this.epic = epic;
+    //Конструктор без id и startTime, но с duration
+    public Subtask(int epicId, String name, String description, TaskStatus status, long minutes) {
+        super(name, description, status, minutes);
+        this.epicId = epicId;
     }
 
-    public Subtask(String nameTask, String descriptionTask, TaskStatus status, Epic epic, int id, LocalDateTime startTime, Duration duration) {
-        super(nameTask, descriptionTask, status, id, startTime, duration);
-        this.epic = epic;
-        if (duration == null) {
-            throw new IllegalArgumentException("Subtask duration cannot be null");
-        }
+    //Конструктор c id, но без duration и startTime
+    public Subtask(int epicId, int id, String name, String description, TaskStatus status) {
+        super(id, name, description, status);
+        this.epicId = epicId;
     }
 
-    public void setEpic(Epic epic) {
-        this.epic = epic;
+    //Конструктор c id и duration, но без startTime
+    public Subtask(int epicId, int id, String name, String description, TaskStatus status, long minutes) {
+        super(id, name, description, status, minutes);
+        this.epicId = epicId;
     }
 
-    public Epic getEpic() {
-        return epic;
+    @Override
+    public TypeClass getType() {
+        return TypeClass.SUBTASK;
+    }
+
+    public int getEpicId() {
+        return epicId;
+    }
+
+    public void setEpicId(int epicId) {
+        this.epicId = epicId;
     }
 
     @Override
     public String toString() {
         return "Subtask{" +
-                "name='" + getNameTask() + '\'' +
-                ", description='" + getDescriptionTask() + '\'' +
-                ", status=" + getStatus() +
-                ", epicId=" + (epic != null ? epic.getId() : null) +
+                "epicId=" + epicId +
+                ", id=" + id +
+                ", status=" + status +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), epic);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Subtask subtask = (Subtask) o;
+        return epicId == subtask.epicId;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Subtask)) return false;
-        if (!super.equals(obj)) return false;
-
-        Subtask subtask = (Subtask) obj;
-        return Objects.equals(epic, subtask.epic);
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), epicId);
     }
 }
