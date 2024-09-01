@@ -1,26 +1,21 @@
-import exception.ManagerSaveException;
-import manager.*;
+import manager.HistoryManager;
+import manager.Managers;
+import manager.TaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.TaskStatus;
 
-import java.io.File;
-import java.time.Duration;
-import java.time.LocalDateTime;
-
-import static manager.FileBackedTaskManager.loadFromFile;
-
 public class Main {
 
     public static void main(String[] args) {
         // Создаем задачи
-        Task task1 = new Task("Task 1", "Description 1",TaskStatus.NEW);
-        Task task2 = new Task("Task 2", "Description 2",TaskStatus.IN_PROGRESS);
+        Task task1 = new Task("Task 1", "Description 1", TaskStatus.NEW);
+        Task task2 = new Task("Task 2", "Description 2", TaskStatus.IN_PROGRESS);
 
         // Создаем эпики с подзадачами
-        Epic epic1 = new Epic("Epic 1", "Epic Description 1",TaskStatus.NEW);
-        Epic epic2 = new Epic("Epic 2", "Epic Description 2",TaskStatus.NEW);
+        Epic epic1 = new Epic("Epic 1", "Epic Description 1", TaskStatus.NEW);
+        Epic epic2 = new Epic("Epic 2", "Epic Description 2", TaskStatus.NEW);
 
         // Создаем подзадачи
         Subtask subtask1 = new Subtask(3, "Subtask 1 in Epic 1", "SubDescription 1", TaskStatus.NEW);
