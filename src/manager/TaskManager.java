@@ -59,6 +59,4 @@ public interface TaskManager {
     //Получение списка всех подзадач определённого эпика
     List<Subtask> getSubtasksOfEpic(int id);
 
-    // Метод для управления статусами эпиков
-    public void updateEpicStatus(int epicId);
 }

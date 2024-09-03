@@ -48,12 +48,6 @@ class EpicTest {
     }
 
     @Test
-    void shouldReturnNewEpicStatusWithAllSubtasksNewStatus() {
-        manager.updateEpicStatus(epic.getId());
-        assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус эпика c новыми сабтасками не NEW");
-    }
-
-    @Test
     void shouldReturnProgressEpicStatusWithSubtasksProgressStatus() {
         subtask1.setStatus(TaskStatus.IN_PROGRESS);
         subtask2.setStatus(TaskStatus.IN_PROGRESS);
