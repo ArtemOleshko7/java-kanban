@@ -100,33 +100,6 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     }
 
     @Test
-    public void when30MinutesBetweenTasks_TasksShouldNotOverlap() { //Промежуток между временем выполнения задач - 30 минут
-        task.setStartTime(2024, 8, 6, 9, 0);
-        task.setDuration(30);
-        subtask.setStartTime(2024, 8, 6, 10, 0);
-        subtask.setDuration(30);
-
-        manager.updateTask(task);
-        manager.updateTask(subtask);
-
-        assertFalse(manager.isTimeOverlap(task));
-        assertFalse(manager.isTimeOverlap(subtask));
-    }
-
-    @Test
-    public void when0MinutesBetweenTasks_TasksShouldNotOverlap() { //Промежуток между временем выполнения задач - 0 минут
-        task.setStartTime(2024, 8, 6, 9, 0);
-        task.setDuration(60);
-        subtask.setStartTime(2024, 8, 6, 10, 0);
-        subtask.setDuration(30);
-
-        manager.updateTask(task);
-        manager.updateTask(subtask);
-
-        assertFalse(manager.isTimeOverlap(subtask));
-    }
-
-    @Test
     public void testOverlap() {
         task.setStartTime(2024, 8, 6, 9, 0); // Накладка времени выполнения задач - 10 минут
         task.setDuration(70);
@@ -140,31 +113,6 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         } catch (IllegalArgumentException e) {
             assertEquals("Task time overlaps with an existing task", e.getMessage());
         }
-    }
-
-    @Test
-    public void whenNoStartTimeAndDuration_TasksShouldNotOverlap() {
-        task.setStartTime(null);
-        subtask.setStartTime(null);
-
-        manager.updateTask(task);
-        manager.updateTask(subtask);
-
-        assertFalse(manager.isTimeOverlap(subtask));
-    }
-
-    @Test
-    public void whenNoStartTime_ThereAreDurations_TasksShouldNotOverlap() {
-        task.setStartTime(null);
-        subtask.setStartTime(null);
-
-        task.setDuration(20);
-        subtask.setDuration(20);
-
-        manager.updateTask(task);
-        manager.updateTask(subtask);
-
-        assertFalse(manager.isTimeOverlap(subtask));
     }
 
     @Test

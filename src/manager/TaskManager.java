@@ -22,8 +22,6 @@ public interface TaskManager {
 
     void updateSubtask(Subtask subtask);
 
-    boolean isTimeOverlap(Task task);
-
     //Получение списков задач
     List<Task> getAllTasks();
 
