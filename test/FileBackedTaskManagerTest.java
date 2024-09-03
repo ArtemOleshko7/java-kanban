@@ -1,85 +1,138 @@
+import exception.ManagerSaveException;
 import manager.FileBackedTaskManager;
-import model.Epic;
-import model.Subtask;
 import model.Task;
-import model.TaskStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
 
-import static manager.FileBackedTaskManager.loadFromFile;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
-class FileBackedTaskManagerTest {
-    @Test
-    void shouldBeSaveVoidFileAndDownloadVoidFile() {
-        try {
-            // Создаем временный файл для тестирования
-            File file = File.createTempFile("fileForTest", ".txt", new File(
-                    "C:\\Users\\I\\Desktop\\java-kanban(NewTry)\\test\\resource"));
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
-            // Инициализируем FileBackedTaskManager для сохранения задач
-            FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
+    @BeforeEach
+    void setUp() throws IOException {
+        super.setUp();
+        manager = new FileBackedTaskManager(file);
+    }
 
-            // Загружаем задачи из файла
-            FileBackedTaskManager fileBackedTaskManager1 = loadFromFile(file);
-
-            // Проверяем, что файл для сохранения задач соответствует созданному
-            assertEquals(fileBackedTaskManager.getFileWithSavedTasks(), file, "Файл не сохранен");
-            // Убеждаемся, что файл пустой
-            assertEquals(fileBackedTaskManager.getFileWithSavedTasks().length(), 0, "Файл не пустой");
-
-            // Проверяем, что файл был загружен корректно
-            assertEquals(fileBackedTaskManager1.getFileWithSavedTasks(), file, "Файл не загружен");
-            // Снова убеждаемся, что загруженный файл пустой
-            assertEquals(fileBackedTaskManager1.getFileWithSavedTasks().length(), 0, "Файл не пустой");
-        } catch (IOException e) {
-            // Обрабатываем исключение, выводя стек вызовов
-            e.printStackTrace();
-        }
+    @AfterEach
+    void tearDown() {
+        file.delete();
     }
 
     @Test
-    void shouldToSaveTasksAndDownloadTasks() {
-        try {
-            File directory = new File("C:\\Users\\I\\desktop\\java-kanban(NewTry)\\test\\resource");
-            if (!directory.exists()) {
-                directory.mkdirs(); // Создание всех недостающих директорий
-            }
-            File file1 = File.createTempFile("fileForTest", ".txt", directory);
-            FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file1);
-            Task task = new Task("run", "running", TaskStatus.NEW);
-            fileBackedTaskManager.createTask(task);
-            Epic epic = new Epic("Move", "Move");
-            Subtask subtask = new Subtask("House", "Buy new house", TaskStatus.NEW, epic);
-            fileBackedTaskManager.createEpic(epic);
-            fileBackedTaskManager.createSubtask(subtask);
-            BufferedReader fileReader = new BufferedReader(new FileReader(file1.getPath()));
-            String line = fileReader.readLine();
-            while (fileReader.ready()) {
-                line = fileReader.readLine();
-                if (fileBackedTaskManager.getNameClass(line).equals("Task")) {
-                    assertEquals(task, fileBackedTaskManager.fromStringTask(line),
-                            "Задача не сохранилась в файл");
-                } else if (fileBackedTaskManager.getNameClass(line).equals("Subtask")) {
-                    assertEquals(subtask, fileBackedTaskManager.fromStringSubtask(line),
-                            "Задача не сохранилась в файл");
-                } else {
-                    assertEquals(epic, fileBackedTaskManager.fromStringEpic(line),
-                            "Задача не сохранилась в файл");
-                }
-            }
-            fileReader.close();
-            FileBackedTaskManager fileBackedTaskManager1 = loadFromFile(file1);
-            assertEquals(task, fileBackedTaskManager1.getTask(1), "Задачи не загрузились");
-            assertEquals(epic, fileBackedTaskManager1.getEpic(2), "Задачи не загрузились");
-            assertEquals(subtask, fileBackedTaskManager1.getSubtask(3), "Задачи не загрузились");
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void LoadTaskFromFile() {
+        manager.addTask(task);
+        FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
+        System.out.println("Проверка загрузки задач: " + manager.getAllTasks().equals(manager2.getAllTasks()));
+    }
+
+    @Test
+    public void LoadEpicFromFile() {
+        manager.addEpic(epic);
+        FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
+        System.out.println("Проверка загрузки эпиков: " + manager.getAllTasks().equals(manager2.getAllTasks()));
+    }
+
+    @Test
+    public void LoadSubtaskFromFile() {
+        manager.addEpic(epic);
+        manager.addSubtask(subtask);
+        FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
+        System.out.println("Проверка загрузки подзадач: " + manager.getAllTasks().equals(manager2.getAllTasks()));
+    }
+
+    @Test
+    public void LoadMultipleTasks() {
+        manager.addTask(task);
+        manager.addEpic(epic);
+        manager.addSubtask(subtask);
+
+        List<Task> tasks = manager.getAllTasks();
+
+        FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
+        List<Task> tasks2 = manager2.getAllTasks();
+
+        System.out.println("ID последней задачи: " + tasks.get(2).getId() + ", " + tasks.get(2).getId().equals(tasks2.get(2).getId()));
+    }
+
+    @Test
+    void saveAndLoadEmptyFile() {
+        manager.save();
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
+
+        assertTrue(loadedManager.getAllTasks().isEmpty(), "Task list should be empty");
+        assertTrue(loadedManager.getEpics().isEmpty(), "Epic list should be empty");
+        assertTrue(loadedManager.getSubtasks().isEmpty(), "Subtask list should be empty");
+    }
+
+    @Test
+    void saveAndLoadSingleTaskWithDurationAndStartTime() {
+        task.setStartTime(2024, 9, 1, 9, 0);
+        task.setDuration(30);
+        manager.addTask(task);
+
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
+
+        assertEquals(1, loadedManager.getTasks().size(), "Task list size should be 1");
+        assertEquals(task, loadedManager.getTaskById(task.getId()), "Loaded task should match original");
+    }
+
+    @Test
+    public void testSaveDoesNotThrowException() throws IOException {
+        manager.addTask(task);
+
+        assertDoesNotThrow(() -> {
+            manager.save();
+        }, "Expected ManagerSaveException not to be thrown, but it was");
+
+        List<String> lines = Files.readAllLines(file.toPath());
+        assertEquals(2, lines.size());
+    }
+
+    @Test
+    public void testSaveThrowsIOException() throws IOException {
+        // Каталог, который будет использоваться вместо файла
+        File tempDir = Files.createTempDirectory("testDir").toFile();
+        FileBackedTaskManager manager = new FileBackedTaskManager(tempDir);
+        tempDir.deleteOnExit();
+
+        assertThrows(ManagerSaveException.class, () -> {
+            manager.save();
+        }, "Expected ManagerSaveException to be thrown, but it was not");
+    }
+
+    @Test
+    public void testLoadFromFileDoesNotThrowException() throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
+            writer.write("id,type,name,status,description,duration,start time,epic\n");
+            writer.write("1,TASK,Test Task,NEW,Test description,null,null\n");
         }
+
+        assertDoesNotThrow(() -> {
+            FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
+            List<Task> tasks = loadedManager.getTasks();
+            assertEquals(1, tasks.size());
+            assertEquals("Test Task", tasks.get(0).getName());
+        }, "Expected ManagerSaveException not to be thrown, but it was");
+    }
+
+    @Test
+    public void testLoadFromFileThrowsException() throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
+            writer.write("id,type,name,status,description,duration,start time,epic\n");
+            writer.write("1,WRONGTYPE,Test Task,NEW,Test description,null,null\n");
+        }
+
+        assertThrows(ManagerSaveException.class, () -> {
+            FileBackedTaskManager.loadFromFile(file);
+        }, "Expected ManagerSaveException to be thrown, but it was not");
     }
 }

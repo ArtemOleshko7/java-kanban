@@ -5,101 +5,86 @@ import model.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
+    private Node head;
+    private Node tail;
+    private final HashMap<Integer, Node> historyMap = new HashMap<>();
 
-    private final TasksDoubleList<Task> tasksDoubleList = new TasksDoubleList<>();
-    private final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
+    private static class Node {
+        Task task;
+        Node prev;
+        Node next;
 
-    @Override
-    public void add(Task task) {
-        if (nodeMap.containsKey(task.getId())) {
-            remove(task.getId());
+        Node(Task task) {
+            this.task = task;
         }
-        Task taskHistory = new Task(task.getNameTask(), task.getDescriptionTask(), task.getStatus(), task.getId());
-        tasksDoubleList.linkLast(taskHistory);
-        nodeMap.put(task.getId(), tasksDoubleList.tail);
     }
 
     @Override
-    public List<Task> getHistory() {
-        return tasksDoubleList.getTask();
+    public void add(Task task) {
+        if (task == null) {
+            return;
+        }
+        remove(task.getId());  // Удаляем старое вхождение, если оно есть
+        linkLast(task); // Добавляем новое вхождение в конец списка
+    }
+
+    private void linkLast(Task task) {
+        Node newNode = new Node(task);
+        if (tail == null) {
+            head = tail = newNode;
+        } else {
+            tail.next = newNode;
+            newNode.prev = tail;
+            tail = newNode;
+        }
+        historyMap.put(task.getId(), newNode);
     }
 
     @Override
     public void remove(int id) {
-        tasksDoubleList.removeNode(nodeMap.remove(id));
-    }
-
-    public static class TasksDoubleList<T> {
-        private Node<T> head; // Поле head теперь приватное
-        private Node<T> tail; // Поле tail теперь приватное
-        private int size = 0; // Поле size теперь приватное
-
-        public void linkLast(T task) {
-            final Node<T> oldTail = tail;
-            final Node<T> newNode = new Node<>(task, oldTail, null);
-            tail = newNode;
-            if (oldTail == null) {
-                head = newNode;
-            } else {
-                oldTail.next = newNode;
-            }
-            size++;
-        }
-
-        public List<T> getTask() {
-            List<T> history = new ArrayList<>();
-            Node<T> task = head; // Начинаем с головы списка
-            while (task != null) { // Пока есть узлы
-                history.add(task.data); // Добавляем данные в историю
-                task = task.next; // Переходим к следующему узлу
-            }
-            return history; // Возвращаем собранный список
-        }
-
-        public void removeNode(Node<T> taskNode) {
-            if (taskNode == null) {
-                throw new IllegalArgumentException("taskNode cannot be null");
-            }
-
-            Node<T> prevNode = taskNode.prev;
-            Node<T> nextNode = taskNode.next;
-
-            size--;
-            if (size == 0) {
-                head = tail = null;
-            } else if (taskNode == tail) {
-                tail = prevNode;
-                if (tail != null) {
-                    tail.next = null; // Проверка на null, чтобы избежать NPE
-                }
-            } else if (taskNode == head) {
-                head = nextNode;
-                if (head != null) {
-                    head.prev = null; // Проверка на null, чтобы избежать NPE
-                }
-            } else {
-                if (prevNode != null) {
-                    prevNode.next = nextNode;
-                }
-                if (nextNode != null) {
-                    nextNode.prev = prevNode;
-                }
-            }
+        Node toRemove = historyMap.get(id);
+        if (toRemove != null) {
+            removeNode(toRemove);
         }
     }
 
-    private static class Node<T> {
-        public T data;
-        public Node<T> next;
-        public Node<T> prev;
-
-        public Node(T data, Node<T> prev, Node<T> next) {
-            this.data = data;
-            this.next = next;
-            this.prev = prev;
+    private void removeNode(Node node) {
+        if (node.prev != null) {
+            node.prev.next = node.next;
+        } else {
+            head = node.next;
         }
+        if (node.next != null) {
+            node.next.prev = node.prev;
+        } else {
+            tail = node.prev;
+        }
+        historyMap.remove(node.task.getId());
+        node.prev = null;
+        node.next = null;
+    }
+
+    public void clearHistory() {
+        head = null;
+        tail = null;
+        historyMap.clear();
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        List<Task> tasks = new ArrayList<>();
+        Node current = head;
+        while (current != null) {
+            tasks.add(current.task);
+            current = current.next;
+        }
+        return tasks;
+    }
+
+    @Override
+    public String toString() {
+        return "History:\n" + getHistory();
     }
 }

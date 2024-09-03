@@ -1,54 +1,60 @@
 package manager;
 
 import model.Epic;
-import model.Task;
 import model.Subtask;
+import model.Task;
 
 import java.util.List;
 
 
 public interface TaskManager {
+    //Добавление новых задач
+    void addTask(Task task);
 
+    void addEpic(Epic epic);
 
-    Task getTask(int id);
+    void addSubtask(Subtask subtask);
 
-    Epic getEpic(int id);
-
-    Subtask getSubtask(int id);
-
-    Task createTask(Task task);
-
-    Epic createEpic(Epic epic);
-
-    Subtask createSubtask(Subtask subtask);
-
+    //Обновление существующих задач
     void updateTask(Task task);
-
-    void updateSubtask(Subtask subtask);
 
     void updateEpic(Epic epic);
 
+    void updateSubtask(Subtask subtask);
+
+    //Получение списков задач
     List<Task> getAllTasks();
 
-    List<Task> getAllEpics();
+    List<Task> getTasks();
 
-    List<Task> getAllSubtasks();
+    List<Epic> getEpics();
 
-    void deleteTaskById(int id);
+    List<Subtask> getSubtasks();
 
-    void deleteSubtaskById(int id);
+    //Удаление задач
+    void removeAll();
 
-    void deleteEpicById(int id);
+    void removeAllTasks();
 
-    void deleteAllTasks();
+    void removeAllSubtasks();
 
-    void deleteAllSubtask();
+    void removeAllEpics();
 
-    void deleteAllEpic();
+    //Получение по идентификатору
+    Task getTaskById(int taskId);
 
-    List<Subtask> getSubtasksByEpic(Epic epic);
+    Subtask getSubtaskById(int subtaskId);
 
-    List<Task> getHistory();
+    Epic getEpicById(int epicId);
 
+    //Удаление по идентификатору
+    void removeTask(int id);
+
+    void removeSubtask(int id);
+
+    void removeEpic(int id);
+
+    //Получение списка всех подзадач определённого эпика
+    List<Subtask> getSubtasksOfEpic(int id);
 
 }
