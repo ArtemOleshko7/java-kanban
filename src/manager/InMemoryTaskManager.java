@@ -150,9 +150,6 @@ public class InMemoryTaskManager implements TaskManager {
     private boolean isTimeOverlap(Task newTask) {
         return prioritizedTasks.stream()
                 .anyMatch(task -> {
-                    if (task.getId() == newTask.getId()) {
-                        return false;
-                    }
                     if (task.getStartTime() == null || newTask.getStartTime() == null) {
                         return false;
                     }
