@@ -22,7 +22,15 @@ public interface TaskManager {
 
     void updateSubtask(Subtask subtask);
 
-    //Получение списков задач
+    boolean isTimeOverlap(Task task);
+
+    //Получение задач
+    Task getTaskById(int taskId);
+
+    Subtask getSubtaskById(int subtaskId);
+
+    Epic getEpicById(int epicId);
+
     List<Task> getAllTasks();
 
     List<Task> getTasks();
@@ -30,6 +38,8 @@ public interface TaskManager {
     List<Epic> getEpics();
 
     List<Subtask> getSubtasks();
+
+    List<Task> getPrioritizedTasks();
 
     //Удаление задач
     void removeAll();
@@ -40,21 +50,13 @@ public interface TaskManager {
 
     void removeAllEpics();
 
-    //Получение по идентификатору
-    Task getTaskById(int taskId);
-
-    Subtask getSubtaskById(int subtaskId);
-
-    Epic getEpicById(int epicId);
-
-    //Удаление по идентификатору
     void removeTask(int id);
 
     void removeSubtask(int id);
 
     void removeEpic(int id);
 
-    //Получение списка всех подзадач определённого эпика
     List<Subtask> getSubtasksOfEpic(int id);
 
+    public void updateEpicStatus(int epicId);
 }
